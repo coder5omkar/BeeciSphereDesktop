@@ -1,0 +1,293 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { getMemberByBCID, deleteMember } from "../services/MemberService";
+import { getTodo } from "../services/TodoService";
+import { Pie } from "react-chartjs-2";
+import "chart.js/auto";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+
+const MemberTable = () => {
+  const { todoId } = useParams();
+  const navigate = useNavigate();
+  const [members, setMembers] = useState([]);
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [numberOfInstallments, setNumberOfInstallments] = useState(0);
+  const [installmentAmount, setInstallmentAmount] = useState(0);
+
+  useEffect(() => {
+    fetchTodoDetails();
+    fetchMembers();
+  }, []);
+
+  const fetchTodoDetails = async () => {
+    try {
+      const response = await getTodo(todoId);
+      console.log("NOI", response.data.numberOfInstallments);
+      console.log("installmentAmount", response.data.bcAmount);
+
+
+    } catch (error) {
+      console.error("Error fetching todo details:", error);
+    }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const response = await getMemberByBCID(todoId);
+      const response2 = await getTodo(todoId);
+  
+      const numberOfInstallments = response2.data.numberOfInstallments || 0;
+      const installmentAmount = response2.data.bcAmount || 0;
+  
+      setNumberOfInstallments(numberOfInstallments);
+      setInstallmentAmount(installmentAmount);
+  
+      setMembers(
+        response.data.map((member) => ({
+          ...member,
+          amountReceived: member.contributions.reduce(
+            (sum, contribution) => sum + (contribution.amount || 0),
+            0
+          ),
+          maturityAmount: numberOfInstallments * installmentAmount, // Now uses correct values
+        }))
+      );
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
+  };
+  
+  
+
+  const handleAddMember = () => {
+    navigate(`/members/${todoId}/add`);
+  };
+
+  const handleUpdateMember = (memberId) => {
+    navigate(`/members/${todoId}/edit/${memberId}`);
+  };
+
+  const handleDeleteMember = async (memberId) => {
+    if (window.confirm("Are you sure you want to delete this member?")) {
+      try {
+        await deleteMember(memberId);
+        fetchMembers();
+      } catch (error) {
+        console.error("Error deleting member:", error);
+      }
+    }
+  };
+
+  const handleViewMember = (member) => {
+    setSelectedMember(member);
+    setShowPopup(true);
+  };
+
+  const handleViewContries = (memberId) => {
+    navigate(`/members/${todoId}/contries/${memberId}`);
+  };
+
+  const closePopup = () => {
+    setShowPopup(false);
+    setSelectedMember(null);
+  };
+
+  const handleDownloadPDF = () => {
+    const input = document.getElementById("popup-content");
+    html2canvas(input, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const imgWidth = pageWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.setFontSize(12);
+      pdf.text(`Member Details - ${new Date().toLocaleString()}`, 10, 10);
+      pdf.addImage(imgData, "PNG", 10, 20, imgWidth, imgHeight);
+      pdf.save(`Member_${selectedMember.id}_${Date.now()}.pdf`);
+    });
+  };
+
+  const handleWhatsAppContact = (member) => {
+    setSelectedMember(member);
+
+    // alert(`Member Details:\n${JSON.stringify(member, null, 2)}`);
+    const { phoneNumber, name, amountReceived, maturityAmount, status, dateJoined, maturityDate } = member;
+  
+    // Check if the phone number is valid
+    if (!phoneNumber || phoneNumber.trim() === "") {
+      alert("या सदस्यासाठी मोबाइल नंबर उपलब्ध नाही.");
+      return;
+    }
+  
+    // Remove any non-numeric characters from the phone number
+    const cleanedPhoneNumber = phoneNumber.replace(/\D/g, "");
+  
+    // Check if the cleaned phone number is valid
+    if (cleanedPhoneNumber.length < 10) {
+      alert("अवैध मोबाइल नंबर.");
+      return;
+    }
+  
+    // Create a pre-typed message in Marathi
+    const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(dateJoined).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(maturityDate).toLocaleDateString()}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
+  
+    // Encode the message for the URL
+    const encodedMessage = encodeURIComponent(message);
+  
+    // Open WhatsApp in a new window with the pre-typed message
+    const whatsappUrl = `whatsapp://send?phone=${cleanedPhoneNumber}&text=${encodedMessage}`;
+    window.open(whatsappUrl, "_blank");
+  };
+
+  return (
+    <div className="container my-4">
+      <h2 className="text-center mb-4">Members for BC: {todoId}</h2>
+      <div className="d-flex justify-content-end mb-3">
+        <button className="btn btn-primary" onClick={handleAddMember}>
+          Add Member
+        </button>
+      </div>
+
+      <div className="table-responsive">
+        <table className="table table-bordered table-striped">
+          <thead className="thead-dark">
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Amount Received</th>
+              <th>Maturity Amount</th>
+              <th>Status</th>
+              <th>Date Joined</th>
+              <th>Maturity Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.length > 0 ? (
+              members.map((member) => (
+                <tr key={member.id}>
+                  <td>{member.id}</td>
+                  <td>{member.name}</td>
+                  <td>{member.amountReceived}</td>
+                  <td>{member.maturityAmount}</td>
+                  <td>{member.status}</td>
+                  <td>{new Date(member.dateJoined).toLocaleDateString()}</td>
+                  <td>{new Date(member.maturityDate).toLocaleDateString()}</td>
+                  <td>
+                    <button
+                      className="btn btn-info btn-sm mb-1"
+                      onClick={() => handleUpdateMember(member.id)}
+                    >
+                      Update
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm mb-1 ml-1"
+                      onClick={() => handleDeleteMember(member.id)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="btn btn-primary btn-sm mb-1 ml-1"
+                      onClick={() => handleViewMember(member)}
+                    >
+                      View Member
+                    </button>
+                    <button
+                      className="btn btn-secondary btn-sm mb-1 ml-1"
+                      onClick={() => handleViewContries(member.id)}
+                    >
+                      View Countries
+                    </button>
+                    <button
+                      className="btn btn-success btn-sm mb-1 ml-1"
+                      onClick={() => handleWhatsAppContact(member)}
+                    >
+                      Contact
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center">
+                  No members found for this Todo.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {showPopup && selectedMember && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <button className="close-button" onClick={closePopup}>
+              &times;
+            </button>
+            <h3 className="text-center">Member Details</h3>
+
+            <div id="popup-content" className="popup-content">
+              <div className="popup-details">
+                <p>
+                  <strong>ID:</strong> {selectedMember.id}
+                </p>
+                <p>
+                  <strong>Name:</strong> {selectedMember.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {selectedMember.email}
+                </p>
+                <p>
+                  <strong>Phone Number:</strong> {selectedMember.phoneNumber}
+                </p>
+                <p>
+                  <strong>Address:</strong> {selectedMember.address}
+                </p>
+                <p>
+                  <strong>Amount Received:</strong> {selectedMember.amountReceived}
+                </p>
+                <p>
+                  <strong>Maturity Amount:</strong> {selectedMember.maturityAmount}
+                </p>
+                <p>
+                  <strong>Status:</strong> {selectedMember.status}
+                </p>
+                <p>
+                  <strong>Date Joined:</strong> {new Date(selectedMember.dateJoined).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Maturity Date:</strong> {new Date(selectedMember.maturityDate).toLocaleDateString()}
+                </p>
+              </div>
+
+              <div className="popup-chart">
+                <h4 className="text-center">Financial Overview</h4>
+                <Pie
+                  data={{
+                    labels: ["Amount Received", "Maturity Amount"],
+                    datasets: [
+                      {
+                        data: [selectedMember.amountReceived, selectedMember.maturityAmount],
+                        backgroundColor: ["#4CAF50", "#FFC107"],
+                      },
+                    ],
+                  }}
+                  options={{ maintainAspectRatio: true }}
+                />
+              </div>
+            </div>
+
+            <button className="btn btn-success mt-3" onClick={handleDownloadPDF}>
+              Download PDF
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default MemberTable;
