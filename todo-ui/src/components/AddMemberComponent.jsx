@@ -41,7 +41,7 @@ const AddMemberComponent = () => {
     e.preventDefault();
     try {
       await saveMember(member); // Save the member via the service
-      navigate(`/members/${todo}`); // Navigate back to the members list page after saving
+      navigate(-1); // Navigate back to the previous page after saving
     } catch (error) {
       console.error("Error adding member:", error);
     }
@@ -101,31 +101,6 @@ const AddMemberComponent = () => {
           </div>
         </div>
 
-        {/* <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label">Amount Received:</label>
-            <input
-              type="number"
-              className="form-control"
-              name="amountReceived"
-              value={member.amountReceived}
-              onChange={handleChange}
-              required
-            /> */}
-          {/* </div>
-          <div className="col-md-6">
-            <label className="form-label">Maturity Amount:</label>
-            <input
-              type="number"
-              className="form-control"
-              name="maturityAmount"
-              value={member.maturityAmount}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div> */}
-
         <div className="row mb-3">
           <div className="col-md-6">
             <label className="form-label">Status:</label>
@@ -154,20 +129,6 @@ const AddMemberComponent = () => {
             />
           </div>
         </div>
-
-        {/* <div className="row mb-3">
-          <div className="col-md-6">
-            <label className="form-label">Maturity Date:</label>
-            <input
-              type="date"
-              className="form-control"
-              name="maturityDate"
-              value={member.maturityDate}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div> */}
 
         <div className="text-center">
           <button type="submit" className="btn btn-primary mt-3 px-4 py-2">

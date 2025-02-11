@@ -6,6 +6,7 @@ import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { FaUserEdit, FaTrash, FaEye, FaPhone, FaFilePdf,FaMoneyBillWave } from "react-icons/fa";
 
 const MemberTable = () => {
   const { todoId } = useParams();
@@ -15,6 +16,7 @@ const MemberTable = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [numberOfInstallments, setNumberOfInstallments] = useState(0);
   const [installmentAmount, setInstallmentAmount] = useState(0);
+  const [maturityAmount, setMaturityAmount] = useState(0);
 
   useEffect(() => {
     fetchTodoDetails();
@@ -26,8 +28,6 @@ const MemberTable = () => {
       const response = await getTodo(todoId);
       console.log("NOI", response.data.numberOfInstallments);
       console.log("installmentAmount", response.data.bcAmount);
-
-
     } catch (error) {
       console.error("Error fetching todo details:", error);
     }
@@ -37,13 +37,15 @@ const MemberTable = () => {
     try {
       const response = await getMemberByBCID(todoId);
       const response2 = await getTodo(todoId);
-  
+
       const numberOfInstallments = response2.data.numberOfInstallments || 0;
       const installmentAmount = response2.data.bcAmount || 0;
-  
+      const maturityAmount = numberOfInstallments * installmentAmount;
+
       setNumberOfInstallments(numberOfInstallments);
       setInstallmentAmount(installmentAmount);
-  
+      setMaturityAmount(maturityAmount);
+
       setMembers(
         response.data.map((member) => ({
           ...member,
@@ -51,15 +53,13 @@ const MemberTable = () => {
             (sum, contribution) => sum + (contribution.amount || 0),
             0
           ),
-          maturityAmount: numberOfInstallments * installmentAmount, // Now uses correct values
+          maturityAmount: maturityAmount,
         }))
       );
     } catch (error) {
       console.error("Error fetching members:", error);
     }
   };
-  
-  
 
   const handleAddMember = () => {
     navigate(`/members/${todoId}/add`);
@@ -113,31 +113,24 @@ const MemberTable = () => {
   const handleWhatsAppContact = (member) => {
     setSelectedMember(member);
 
-    // alert(`Member Details:\n${JSON.stringify(member, null, 2)}`);
     const { phoneNumber, name, amountReceived, maturityAmount, status, dateJoined, maturityDate } = member;
-  
-    // Check if the phone number is valid
+
     if (!phoneNumber || phoneNumber.trim() === "") {
       alert("या सदस्यासाठी मोबाइल नंबर उपलब्ध नाही.");
       return;
     }
-  
-    // Remove any non-numeric characters from the phone number
+
     const cleanedPhoneNumber = phoneNumber.replace(/\D/g, "");
-  
-    // Check if the cleaned phone number is valid
+
     if (cleanedPhoneNumber.length < 10) {
-      alert("अवैध मोबाइल नंबर.");
+      alert("अवैध मोबाइल नंबर. Please check/update member details..");
       return;
     }
-  
-    // Create a pre-typed message in Marathi
+
     const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(dateJoined).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(maturityDate).toLocaleDateString()}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
-  
-    // Encode the message for the URL
+
     const encodedMessage = encodeURIComponent(message);
-  
-    // Open WhatsApp in a new window with the pre-typed message
+
     const whatsappUrl = `whatsapp://send?phone=${cleanedPhoneNumber}&text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
   };
@@ -145,7 +138,10 @@ const MemberTable = () => {
   return (
     <div className="container my-4">
       <h2 className="text-center mb-4">Members for BC: {todoId}</h2>
-      <div className="d-flex justify-content-end mb-3">
+      <div className="d-flex justify-content-between mb-3">
+        <div>
+          <strong>Maturity Amount:</strong> ₹{maturityAmount}
+        </div>
         <button className="btn btn-primary" onClick={handleAddMember}>
           Add Member
         </button>
@@ -158,7 +154,6 @@ const MemberTable = () => {
               <th>ID</th>
               <th>Name</th>
               <th>Amount Received</th>
-              <th>Maturity Amount</th>
               <th>Status</th>
               <th>Date Joined</th>
               <th>Maturity Date</th>
@@ -172,47 +167,51 @@ const MemberTable = () => {
                   <td>{member.id}</td>
                   <td>{member.name}</td>
                   <td>{member.amountReceived}</td>
-                  <td>{member.maturityAmount}</td>
                   <td>{member.status}</td>
                   <td>{new Date(member.dateJoined).toLocaleDateString()}</td>
                   <td>{new Date(member.maturityDate).toLocaleDateString()}</td>
                   <td>
                     <button
-                      className="btn btn-info btn-sm mb-1"
+                      className="btn btn-info btn-sm mb-1 me-2"
                       onClick={() => handleUpdateMember(member.id)}
+                      title="Edit Member"
                     >
-                      Update
+                      <FaUserEdit />
                     </button>
                     <button
-                      className="btn btn-danger btn-sm mb-1 ml-1"
-                      onClick={() => handleDeleteMember(member.id)}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="btn btn-primary btn-sm mb-1 ml-1"
-                      onClick={() => handleViewMember(member)}
-                    >
-                      View Member
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-sm mb-1 ml-1"
+                      className="btn btn-success btn-sm mb-1 me-2"
                       onClick={() => handleViewContries(member.id)}
+                      title="View Countries"
                     >
-                      View Countries
+                      <FaMoneyBillWave />
                     </button>
                     <button
-                      className="btn btn-success btn-sm mb-1 ml-1"
-                      onClick={() => handleWhatsAppContact(member)}
+                      className="btn btn-danger btn-sm mb-1 me-2"
+                      onClick={() => handleDeleteMember(member.id)}
+                      title="Delete Member"
                     >
-                      Contact
+                      <FaTrash />
+                    </button>
+                    <button
+                      className="btn btn-primary btn-sm mb-1 me-2"
+                      onClick={() => handleViewMember(member)}
+                      title="View Member"
+                    >
+                      <FaEye />
+                    </button>
+                    <button
+                      className="btn btn-primary btn-sm mb-1 me-2"
+                      onClick={() => handleWhatsAppContact(member)}
+                      title="View Member"
+                    >
+                      <FaPhone />
                     </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center">
+                <td colSpan="7" className="text-center">
                   No members found for this Todo.
                 </td>
               </tr>

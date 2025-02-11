@@ -1,5 +1,6 @@
 package com.example.biceedesktop.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -47,12 +48,29 @@ public class Member {
     @ManyToOne
     @JoinColumn(name = "TODO_ID", nullable = true)
     @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JsonIgnore // Prevent recursion
     private Todo todo;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore // Prevent recursion
+    private Bid bid;
 
     public Member() {
     }
 
-    public Member(Long id, String name, String email, String phoneNumber, String address, BigDecimal amountReceived, BigDecimal maturityAmount, MemberStatus status, Date dateJoined, Date maturityDate, Todo todo, List<Contry> countrys) {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Bid getBid() {
+        return bid;
+    }
+
+    public void setBid(Bid bid) {
+        this.bid = bid;
+    }
+
+    public Member(Long id, String name, String email, String phoneNumber, String address, BigDecimal amountReceived, BigDecimal maturityAmount, MemberStatus status, Date dateJoined, Date maturityDate, Todo todo, Bid bid, List<Contry> countrys) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -64,6 +82,7 @@ public class Member {
         this.dateJoined = dateJoined;
         this.maturityDate = maturityDate;
         this.todo = todo;
+        this.bid = bid;
         this.countrys = countrys;
     }
 

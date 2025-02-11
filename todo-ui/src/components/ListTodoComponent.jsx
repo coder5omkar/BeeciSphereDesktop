@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { deleteTodo, getAllTodos } from "../services/TodoService";
 import { useNavigate } from "react-router-dom";
+import { FaUserEdit, FaTrash, FaEye, FaGavel } from "react-icons/fa";
 
 const ListTodoComponent = () => {
   const [todos, setTodos] = useState([]);
@@ -47,6 +48,10 @@ const ListTodoComponent = () => {
     navigate(`/members/${todo.id}`);
   }
 
+  function viewBids(todo) {
+    navigate(`/bids/${todo.id}`); // Redirect to BidComponent
+  }
+
   // Pagination logic
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
@@ -69,7 +74,7 @@ const ListTodoComponent = () => {
               <th>BC Description</th>
               <th>BC Frequency</th>
               <th>Number of Installments</th>
-              <th>Installment Amount</th>
+              <th>Original Ins Amount</th>
               <th>Total Amount</th>
               <th>Start Date</th>
               <th>End Date</th>
@@ -89,22 +94,33 @@ const ListTodoComponent = () => {
                 <td>{todo.startDate}</td>
                 <td>{todo.endDate}</td>
                 <td>
-                  <button className="btn btn-info btn-sm" onClick={() => updateTodo(todo.id)}>
-                    Update
+                  <button
+                    className="btn btn-info btn-sm mb-1 me-2"
+                    onClick={() => updateTodo(todo.id)}
+                    title="Update Bicee"
+                  >
+                    <FaUserEdit />
                   </button>
                   <button
-                    className="btn btn-danger btn-sm"
+                    className="btn btn-danger btn-sm mb-1 me-2"
                     onClick={() => removeTodo(todo.id)}
-                    style={{ marginLeft: "10px" }}
+                    title="Delete Bicee"
                   >
-                    Delete
+                    <FaTrash />
                   </button>
                   <button
-                    className="btn btn-success btn-sm"
+                    className="btn btn-success btn-sm mb-1 me-2"
                     onClick={() => viewMembers(todo)}
-                    style={{ marginLeft: "10px" }}
+                    title="View Members"
                   >
-                    View Member Details
+                    <FaEye />
+                  </button>
+                  <button
+                    className="btn btn-warning btn-sm mb-1 me-2"
+                    onClick={() => viewBids(todo)}
+                    title="View Bids"
+                  >
+                    <FaGavel />
                   </button>
                 </td>
               </tr>

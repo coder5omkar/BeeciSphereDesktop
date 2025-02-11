@@ -86,12 +86,12 @@ const UpdateMemberComponent = () => {
 
         <div className="row mb-3">
           <div className="col-md-6">
-            <label className="form-label">Phone Number:</label>
+            <label className="form-label">Phone Number s:</label>
             <input
               type="text"
               className="form-control"
               name="phoneNumber"
-              value={member.phoneNumber}
+              value={member.phoneNumber}        
               onChange={handleChange}
               required
             />

@@ -2,6 +2,8 @@ package com.example.biceedesktop.controller;
 
 import com.example.biceedesktop.dto.TodoDto;
 import com.example.biceedesktop.service.TodoService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,9 +38,8 @@ public class TodoController {
 
     // Build Get All Todos REST API
     @GetMapping
-    public ResponseEntity<List<TodoDto>> getAllTodos(){
+    public ResponseEntity<List<TodoDto>> getAllTodos() throws JsonProcessingException {
         List<TodoDto> todos = todoService.getAllTodos();
-        //return new ResponseEntity<>(todos, HttpStatus.OK);
         return ResponseEntity.ok(todos);
     }
 

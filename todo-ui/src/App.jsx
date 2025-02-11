@@ -14,6 +14,7 @@ import AddMemberComponent from "./components/AddMemberComponent";
 import UpdateMemberComponent from "./components/UpdateMemberComponent";
 import ContryComponent from "./components/ContryComponent";
 import ThanksComponent from "./components/ThanksComponent";
+import BidComponent from "./components/BidComponent"; // Import the new BidComponent
 
 function App() {
   function AuthenticatedRoute({ children }) {
@@ -96,6 +97,14 @@ function App() {
             element={
               <AuthenticatedRoute>
                 <UpdateMemberComponent />
+              </AuthenticatedRoute>
+            }
+          />
+          <Route
+            path="/bids/:todoId" // New route for BidComponent
+            element={
+              <AuthenticatedRoute>
+                <BidComponent />
               </AuthenticatedRoute>
             }
           />

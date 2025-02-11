@@ -4,10 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const FrequencyEnum = {
   DAILY: "DAILY",
+  TENDAYS:"TENDAYS",
   WEEKLY: "WEEKLY",
   BIWEEKLY: "BIWEEKLY",
   MONTHLY: "MONTHLY",
-  YEARLY: "YEARLY",
+  YEARLY: "YEARLY"
 };
 
 const TodoComponent = () => {
@@ -29,9 +30,11 @@ const TodoComponent = () => {
     if (!title.trim()) errors.title = "Title is required";
     if (!description.trim()) errors.description = "Description is required";
     if (!frequency) errors.frequency = "Frequency is required";
-    if (!numberOfInstallments.trim() || isNaN(numberOfInstallments))
+    // Check if numberOfInstallments is a valid number
+    if (!numberOfInstallments || isNaN(numberOfInstallments)) {
       errors.numberOfInstallments = "Valid Number of Installments is required";
-    if (!bcAmount.trim() || isNaN(bcAmount))
+    }
+    if (!bcAmount || isNaN(bcAmount))
       errors.bcAmount = "Valid Installment Amount is required";
     if (!startDate) errors.startDate = "Start Date is required";
     if (!endDate) errors.endDate = "End Date is required";
@@ -58,6 +61,7 @@ const TodoComponent = () => {
     };
 
     if (id) {
+      console.log(id);
       updateTodo(id, todo)
         .then(() => navigate("/todos"))
         .catch((error) => console.error(error));
@@ -102,7 +106,9 @@ const TodoComponent = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
-                {errors.title && <small className="text-danger">{errors.title}</small>}
+                {errors.title && (
+                  <small className="text-danger">{errors.title}</small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -114,7 +120,9 @@ const TodoComponent = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-                {errors.description && <small className="text-danger">{errors.description}</small>}
+                {errors.description && (
+                  <small className="text-danger">{errors.description}</small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -130,7 +138,9 @@ const TodoComponent = () => {
                     </option>
                   ))}
                 </select>
-                {errors.frequency && <small className="text-danger">{errors.frequency}</small>}
+                {errors.frequency && (
+                  <small className="text-danger">{errors.frequency}</small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -142,7 +152,11 @@ const TodoComponent = () => {
                   value={numberOfInstallments}
                   onChange={(e) => setNumberOfInstallments(e.target.value)}
                 />
-                {errors.numberOfInstallments && <small className="text-danger">{errors.numberOfInstallments}</small>}
+                {errors.numberOfInstallments && (
+                  <small className="text-danger">
+                    {errors.numberOfInstallments}
+                  </small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -154,7 +168,9 @@ const TodoComponent = () => {
                   value={bcAmount}
                   onChange={(e) => setBcAmount(e.target.value)}
                 />
-                {errors.bcAmount && <small className="text-danger">{errors.bcAmount}</small>}
+                {errors.bcAmount && (
+                  <small className="text-danger">{errors.bcAmount}</small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -165,7 +181,9 @@ const TodoComponent = () => {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
-                {errors.startDate && <small className="text-danger">{errors.startDate}</small>}
+                {errors.startDate && (
+                  <small className="text-danger">{errors.startDate}</small>
+                )}
               </div>
 
               <div className="form-group mb-2">
@@ -176,7 +194,9 @@ const TodoComponent = () => {
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
                 />
-                {errors.endDate && <small className="text-danger">{errors.endDate}</small>}
+                {errors.endDate && (
+                  <small className="text-danger">{errors.endDate}</small>
+                )}
               </div>
 
               <button className="btn btn-success" onClick={saveOrUpdateTodo}>

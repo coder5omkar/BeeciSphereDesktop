@@ -167,13 +167,13 @@ const MemberComponent = () => {
               {/* Left Side: Text Data */}
               <div style={{ flex: 1 }}>
                 <p>
-                  <strong>Name:</strong> {selectedMember.name}
+                  <strong>Name s:</strong> {selectedMember.name}
                 </p>
                 <p>
-                  <strong>Email:</strong> {selectedMember.email}
+                  <strong>Email s:</strong> {selectedMember.email}
                 </p>
                 <p>
-                  <strong>Phone Number:</strong> {selectedMember.phoneNumber}
+                  <strong>Phone Number s:</strong> {selectedMember.phoneNumber}
                 </p>
                 <p>
                   <strong>Amount Received:</strong>{" "}

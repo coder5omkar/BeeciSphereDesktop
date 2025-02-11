@@ -1,18 +1,21 @@
 package com.example.biceedesktop.service.impl;
 
+import com.example.biceedesktop.dto.BidDto;
 import com.example.biceedesktop.dto.ContryDto;
 import com.example.biceedesktop.dto.MemberDto;
+import com.example.biceedesktop.entity.Contry;
 import com.example.biceedesktop.entity.Member;
 import com.example.biceedesktop.entity.Todo;
 import com.example.biceedesktop.exception.ResourceNotFoundException;
 import com.example.biceedesktop.repository.MemberRepository;
 import com.example.biceedesktop.repository.TodoRepository;
 import com.example.biceedesktop.service.MemberService;
-import lombok.AllArgsConstructor;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +28,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDto addMember(MemberDto memberDto) {
+        // Check if a member with the same email already exists
+                Optional<Member> existingMember = memberRepository.findByEmail(memberDto.getEmail());
+        if (existingMember.isPresent()) {
+            throw new RuntimeException("A member with the email " + memberDto.getEmail() + " already exists.");
+        }
+
         // Convert MemberDto to Member entity
         Member member = new Member();
         member.setName(memberDto.getName());
@@ -39,8 +48,9 @@ public class MemberServiceImpl implements MemberService {
 
         // If a todoId is provided, associate the Todo entity
         if (memberDto.getTodoId() != null) {
-            Todo todo = todoRepository.findById(memberDto.getTodoId())
-                    .orElseThrow(() -> new RuntimeException("Todo not found"));
+            Long id = memberDto.getTodoId();
+            Todo todo = todoRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Todo not found with ID: " + id));
             member.setTodo(todo);
         }
 
@@ -52,7 +62,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDto getMember(Long id) {
+    public MemberDto getMember(java.lang.Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + id));
         return mapToMemberDto(member);
@@ -67,7 +77,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDto updateMember(MemberDto memberDto, Long id) {
+    public MemberDto updateMember(MemberDto memberDto, java.lang.Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + id));
 
@@ -97,7 +107,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void deleteMember(Long id) {
+    public void deleteMember(java.lang.Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + id));
         memberRepository.delete(member);
@@ -125,35 +135,52 @@ public class MemberServiceImpl implements MemberService {
                 member.getDateJoined(),
                 member.getMaturityDate(),
                 member.getTodo() != null ? member.getTodo().getId() : null,
-                null // Contributions are not mapped here
+                null ,// Contributions are not mapped here
+                null
         );
     }
 
-    // Helper method to map Member entity to MemberDto with contributions
     private MemberDto mapToMemberDtoWithContributions(Member member) {
-        List<ContryDto> contributions = member.getCountrys().stream()
-                .map(contry -> new ContryDto(
-                        contry.getId(),
-                        contry.getAmount(),
-                        contry.getCountryDate(),
-                        contry.getNumberOfInst(),
-                        member.getId()
-                ))
-                .collect(Collectors.toList());
+        MemberDto memberDto = new MemberDto();
+        memberDto.setId(member.getId());
+        memberDto.setName(member.getName());
+        memberDto.setEmail(member.getEmail());
+        memberDto.setPhoneNumber(member.getPhoneNumber());
+        memberDto.setAddress(member.getAddress());
+        memberDto.setAmountReceived(member.getAmountReceived());
+        memberDto.setMaturityAmount(member.getMaturityAmount());
+        memberDto.setStatus(member.getStatus());
+        memberDto.setDateJoined(member.getDateJoined());
+        memberDto.setMaturityDate(member.getMaturityDate());
+        memberDto.setTodoId(member.getTodo() != null ? member.getTodo().getId() : null);
 
-        return new MemberDto(
-                member.getId(),
-                member.getName(),
-                member.getEmail(),
-                member.getPhoneNumber(),
-                member.getAddress(),
-                member.getAmountReceived(),
-                member.getMaturityAmount(),
-                member.getStatus(),
-                member.getDateJoined(),
-                member.getMaturityDate(),
-                member.getTodo() != null ? member.getTodo().getId() : null,
-                contributions
-        );
+        // Map contributions
+        if (member.getCountrys() != null) {
+            List<ContryDto> contributions = member.getCountrys().stream()
+                    .map(this::mapToContryDto) // Use the mapToContryDto method
+                    .collect(Collectors.toList());
+            memberDto.setContributions(contributions);
+        }
+
+        // Map bid
+        if (member.getBid() != null) {
+            BidDto bidDto = new BidDto();
+            bidDto.setId(member.getBid().getId());
+            bidDto.setBidDate(member.getBid().getBidDate());
+            bidDto.setBidAmount(member.getBid().getAmount());
+            bidDto.setBidWinner(member.getBid().getMember().getId());
+            memberDto.setBid(bidDto);
+        }
+
+        return memberDto;
+    }
+
+    private ContryDto mapToContryDto(Contry contry) {
+        ContryDto contryDto = new ContryDto();
+        contryDto.setId(contry.getId());
+        contryDto.setAmount(contry.getAmount());
+        contryDto.setCountryDate(contry.getCountryDate());
+        contryDto.setNumberOfInst(contry.getNumberOfInst());
+        return contryDto;
     }
 }

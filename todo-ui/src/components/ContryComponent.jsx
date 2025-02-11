@@ -17,6 +17,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { FaUserEdit, FaTrash} from "react-icons/fa";
 
 // Register Chart.js components
 ChartJS.register(
@@ -155,18 +156,20 @@ const ContryComponent = () => {
                       <td>{contry.amount}</td>
                       <td>{contry.countryDate}</td>
                       <td>
-                        <button
-                          className="btn btn-info btn-sm"
-                          onClick={() => handleUpdateContryPopup(contry.id)}
-                        >
-                          Update
-                        </button>
-                        <button
-                          className="btn btn-danger btn-sm ml-2"
-                          onClick={() => handleDeleteContry(contry.id)}
-                        >
-                          Delete
-                        </button>
+                      <button
+                      className="btn btn-info btn-sm mb-1 me-2"
+                      onClick={() => handleUpdateContryPopup(member.id)}
+                      title="Update Contry"
+                    >
+                      <FaUserEdit />
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm mb-1 me-2"
+                      onClick={() => handleDeleteContry(member.id)}
+                      title="Delete"
+                    >
+                      <FaTrash />
+                    </button>
                       </td>
                     </tr>
                   ))

@@ -22,11 +22,13 @@ public class MemberController {
     private ContryService contryService;
 
     @PostMapping
-    public ResponseEntity<MemberDto> addMember(@RequestBody MemberDto memberDto){
-
-        MemberDto savedMember = memberService.addMember(memberDto);
-
-        return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
+    public ResponseEntity<?> addMember(@RequestBody MemberDto memberDto) {
+        try {
+            MemberDto savedMember = memberService.addMember(memberDto);
+            return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("{id}")
@@ -35,7 +37,7 @@ public class MemberController {
         return new ResponseEntity<>(todoDto, HttpStatus.OK);
     }
 
-    @GetMapping("/members/{todoId}")
+    @GetMapping("/todo/{todoId}")
     public ResponseEntity<List<MemberDto>> getMembersByBCID(@PathVariable("todoId") Long todoId) {
         List<MemberDto> members = memberService.getMembersByBCID(todoId);
         return ResponseEntity.ok(members);
