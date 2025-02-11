@@ -20,9 +20,11 @@ const HeaderComponent = () => {
         navigate("/thanks");
       } else {
         alert("Shutdown failed!");
+        navigate("/thanks");
       }
     } catch (error) {
       alert("Error shutting down the application.");
+      navigate("/thanks");
       console.error(error);
     }
   };
@@ -33,7 +35,7 @@ const HeaderComponent = () => {
         <nav className="navbar navbar-expand-md navbar-dark bg-dark position-relative">
           <div className="container">
             <div className="navbar-brand title-animation">
-              Business Collection Management
+              Bicee Sphere Application
             </div>
             <ul className="navbar-nav ms-auto">
               {isAuth && (
