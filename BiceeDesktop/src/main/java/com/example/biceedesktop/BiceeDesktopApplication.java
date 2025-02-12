@@ -38,13 +38,13 @@ public class BiceeDesktopApplication extends Application {
         String imagePath = "C:\\Users\\omkar\\Desktop\\My-App\\BiceeDesktop\\src\\main\\resources\\welcomeimage\\image.png";
         Image image = new Image(new File(imagePath).toURI().toString());
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(1200); // Set image width
-        imageView.setFitHeight(800); // Set image height
+        imageView.setFitWidth(800); // Reduced image width
+        imageView.setFitHeight(600); // Reduced image height
         imageView.setPreserveRatio(false); // Ensure the image fills the space
 
         // Create a progress bar
         ProgressBar progressBar = new ProgressBar(0);
-        progressBar.setPrefWidth(800); // Wider progress bar
+        progressBar.setPrefWidth(600); // Wider progress bar
         progressBar.setStyle("-fx-accent: #00FF00;"); // Customize progress bar color (optional)
 
         // Create a copyright label
@@ -58,7 +58,7 @@ public class BiceeDesktopApplication extends Application {
         vbox.setStyle("-fx-background-color: rgba(0, 0, 0, 0.3); -fx-padding: 20;"); // Semi-transparent background (lighter overlay)
 
         StackPane root = new StackPane(imageView, vbox); // Stack image and VBox
-        Scene scene = new Scene(root, 1200, 800); // Set scene size
+        Scene scene = new Scene(root, 800, 600); // Reduced scene size
         primaryStage.setScene(scene);
         primaryStage.show();
 

@@ -16,7 +16,11 @@ const ListTodoComponent = () => {
   function listTodos() {
     getAllTodos()
       .then((response) => {
-        setTodos(response.data);
+        // Sort by nextInstDate descending before setting state
+        const sortedTodos = response.data.sort(
+          (a, b) => new Date(b.nextInstDate) - new Date(a.nextInstDate)
+        );
+        setTodos(sortedTodos);
       })
       .catch((error) => {
         console.error(error);
@@ -30,7 +34,6 @@ const ListTodoComponent = () => {
   function updateTodo(id) {
     navigate(`/update-todo/${id}`);
   }
-  
 
   function removeTodo(id) {
     if (window.confirm("Are you sure you want to delete this BC?")) {
@@ -40,7 +43,9 @@ const ListTodoComponent = () => {
         })
         .catch((error) => {
           console.error(error);
-          alert("Failed to delete Bicee. It having active members and contributions..delete them first to delete this Bicee");
+          alert(
+            "Failed to delete Bicee. It has active members and contributions. Delete them first to delete this Bicee."
+          );
         });
     }
   }
@@ -50,7 +55,7 @@ const ListTodoComponent = () => {
   }
 
   function viewBids(todo) {
-    navigate(`/bids/${todo.id}`); // Redirect to BidComponent
+    navigate(`/bids/${todo.id}`);
   }
 
   // Pagination logic
@@ -78,6 +83,7 @@ const ListTodoComponent = () => {
               <th>Original Ins Amount</th>
               <th>Total Amount</th>
               <th>Start Date</th>
+              <th>Next Installment</th> {/* New Column */}
               <th>End Date</th>
               <th>Actions</th>
             </tr>
@@ -93,6 +99,19 @@ const ListTodoComponent = () => {
                 <td>{todo.bcAmount}</td>
                 <td>{todo.numberOfInstallments * todo.bcAmount}</td>
                 <td>{todo.startDate}</td>
+                <td>
+                  {todo.nextInstAmount && todo.nextInstDate ? (
+                    `Next Inst ®️ ${todo.nextInstAmount} on ${new Date(
+                      todo.nextInstDate
+                    ).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "2-digit",
+                    })}`
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
                 <td>{todo.endDate}</td>
                 <td>
                   <button

@@ -24,6 +24,8 @@ const MemberTable = () => {
   const [numberOfInstallments, setNumberOfInstallments] = useState(0);
   const [installmentAmount, setInstallmentAmount] = useState(0);
   const [maturityAmount, setMaturityAmount] = useState(0);
+  const [nextInstAmount, setNextInstAmount] = useState(0); // New state for next installment amount
+  const [nextInstDate, setNextInstDate] = useState(null); // New state for next installment date
 
   useEffect(() => {
     fetchTodoDetails();
@@ -33,8 +35,14 @@ const MemberTable = () => {
   const fetchTodoDetails = async () => {
     try {
       const response = await getTodo(todoId);
-      console.log("NOI", response.data.numberOfInstallments);
-      console.log("installmentAmount", response.data.bcAmount);
+      const { bcAmount, numberOfInstallments, nextInstAmount, nextInstDate } =
+        response.data;
+
+      setNumberOfInstallments(numberOfInstallments || 0);
+      setInstallmentAmount(bcAmount || 0);
+      setMaturityAmount(numberOfInstallments * bcAmount);
+      setNextInstAmount(nextInstAmount || 0); // Set next installment amount
+      setNextInstDate(nextInstDate || null); // Set next installment date
     } catch (error) {
       console.error("Error fetching todo details:", error);
     }
@@ -81,7 +89,7 @@ const MemberTable = () => {
       alert("This member has an active bid and cannot be deleted.");
       return;
     }
-  
+
     if (window.confirm("Are you sure you want to delete this member?")) {
       try {
         await deleteMember(member.id);
@@ -91,7 +99,6 @@ const MemberTable = () => {
       }
     }
   };
-  
 
   const handleViewMember = (member) => {
     setSelectedMember(member);
@@ -125,7 +132,7 @@ const MemberTable = () => {
 
   const handleWhatsAppContact = (member) => {
     setSelectedMember(member);
-
+  
     const {
       phoneNumber,
       name,
@@ -135,27 +142,36 @@ const MemberTable = () => {
       dateJoined,
       maturityDate,
     } = member;
-
+  
     if (!phoneNumber || phoneNumber.trim() === "") {
       alert("या सदस्यासाठी मोबाइल नंबर उपलब्ध नाही.");
       return;
     }
-
+  
     const cleanedPhoneNumber = phoneNumber.replace(/\D/g, "");
-
+  
     if (cleanedPhoneNumber.length < 10) {
       alert("अवैध मोबाइल नंबर. Please check/update member details..");
       return;
     }
-
+  
+    // Add next installment details to the message
+    const nextInstMessage = nextInstAmount && nextInstDate
+      ? `\n- पुढील हप्ता: ₹${nextInstAmount} on ${new Date(nextInstDate).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "2-digit",
+        })}`
+      : "\n- पुढील हप्ता: No upcoming installment.";
+  
     const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(
       dateJoined
     ).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(
       maturityDate
-    ).toLocaleDateString()}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
-
+    ).toLocaleDateString()}${nextInstMessage}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
+  
     const encodedMessage = encodeURIComponent(message);
-
+  
     const whatsappUrl = `whatsapp://send?phone=${cleanedPhoneNumber}&text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
   };
@@ -166,7 +182,23 @@ const MemberTable = () => {
       <div className="d-flex justify-content-between mb-3">
         <div>
           <strong>Maturity Amount:</strong> ₹{maturityAmount}
+          <br />
+          {nextInstAmount && nextInstDate ? (
+            <small>
+              <strong>Next Inst:</strong> ®️ ₹{nextInstAmount} on{" "}
+              {new Date(nextInstDate).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              })}
+            </small>
+          ) : (
+            <small>
+              <strong>Next Inst:</strong> No upcoming installment.
+            </small>
+          )}
         </div>
+
         <button className="btn btn-primary" onClick={handleAddMember}>
           Add Member
         </button>
@@ -233,7 +265,7 @@ const MemberTable = () => {
                       <FaEye />
                     </button>
                     <button
-                      className="btn btn-primary btn-sm mb-1 me-2"
+                      className="btn btn-success btn-sm mb-1 me-2"
                       onClick={() => handleWhatsAppContact(member)}
                       title="View Member"
                     >
