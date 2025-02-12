@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { isUserLoggedIn, logout } from "../services/AuthService";
+import { FaPowerOff } from "react-icons/fa";
 
 const HeaderComponent = () => {
   const isAuth = isUserLoggedIn();
   const navigate = useNavigate();
+  const inactivityTimer = useRef(null);
 
   const handleLogout = () => {
     logout();
@@ -29,6 +31,30 @@ const HeaderComponent = () => {
     }
   };
 
+  const resetTimer = () => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    inactivityTimer.current = setTimeout(() => {
+      alert("No activity detected for 10 minutes. Shutting down...");
+      handleShutdown();
+    }, 10 * 60 * 1000); // 10 minutes inactivity
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousemove", resetTimer);
+    document.addEventListener("keydown", resetTimer);
+    document.addEventListener("click", resetTimer);
+    document.addEventListener("scroll", resetTimer);
+    resetTimer();
+
+    return () => {
+      document.removeEventListener("mousemove", resetTimer);
+      document.removeEventListener("keydown", resetTimer);
+      document.removeEventListener("click", resetTimer);
+      document.removeEventListener("scroll", resetTimer);
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, []);
+
   return (
     <div>
       <header>
@@ -47,7 +73,10 @@ const HeaderComponent = () => {
               )}
               {isAuth && (
                 <li className="nav-item">
-                  <button className="btn btn-link nav-link" onClick={handleLogout}>
+                  <button
+                    className="btn btn-link nav-link"
+                    onClick={handleLogout}
+                  >
                     Logout
                   </button>
                 </li>
@@ -64,17 +93,17 @@ const HeaderComponent = () => {
         </nav>
         <button
           className="shutdown-button position-fixed top-0 start-0 m-2"
+          onClick={handleShutdown} // Corrected onClick syntax
           title="Shutdown"
-          onClick={handleShutdown}
         >
-          ⏻
+          <FaPowerOff />
         </button>
       </header>
       <style>
         {`
           .shutdown-button {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: red;
             color: white;
@@ -82,7 +111,6 @@ const HeaderComponent = () => {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
             cursor: pointer;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             transition: background-color 0.3s ease-in-out;

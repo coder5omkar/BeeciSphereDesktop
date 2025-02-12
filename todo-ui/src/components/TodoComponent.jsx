@@ -4,11 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 
 const FrequencyEnum = {
   DAILY: "DAILY",
-  TENDAYS:"TENDAYS",
   WEEKLY: "WEEKLY",
   BIWEEKLY: "BIWEEKLY",
   MONTHLY: "MONTHLY",
-  YEARLY: "YEARLY"
+  YEARLY: "YEARLY",
+  TENDAYS: "TENDAYS",
 };
 
 const TodoComponent = () => {
@@ -19,27 +19,61 @@ const TodoComponent = () => {
   const [bcAmount, setBcAmount] = useState("");
   const [completed, setCompleted] = useState(false);
   const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [endDate, setEndDate] = useState(""); // Read-only field
   const [errors, setErrors] = useState({});
 
   const navigate = useNavigate();
   const { id } = useParams();
+
+  // Function to calculate end date based on start date, frequency, and number of installments
+  const calculateEndDate = (startDate, frequency, numberOfInstallments) => {
+    if (!startDate || !numberOfInstallments) return ""; // Avoid invalid calculations
+
+    const start = new Date(startDate);
+    let daysToAdd = 0;
+
+    switch (frequency) {
+      case "TENDAYS":
+        daysToAdd = numberOfInstallments * 10;
+        break;
+      case "MONTHLY":
+        daysToAdd = numberOfInstallments * 30;
+        break;
+      case "WEEKLY":
+        daysToAdd = numberOfInstallments * 7;
+        break;
+      case "BIWEEKLY":
+        daysToAdd = numberOfInstallments * 15;
+        break;
+      case "YEARLY":
+        daysToAdd = numberOfInstallments * 365;
+        break;
+      default:
+        daysToAdd = 0;
+    }
+
+    start.setDate(start.getDate() + daysToAdd);
+    return start.toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  };
+
+  // Auto-calculate end date whenever relevant fields change
+  useEffect(() => {
+    if (startDate && numberOfInstallments) {
+      setEndDate(calculateEndDate(startDate, frequency, numberOfInstallments));
+    }
+  }, [startDate, frequency, numberOfInstallments]);
 
   function validateForm() {
     let errors = {};
     if (!title.trim()) errors.title = "Title is required";
     if (!description.trim()) errors.description = "Description is required";
     if (!frequency) errors.frequency = "Frequency is required";
-    // Check if numberOfInstallments is a valid number
     if (!numberOfInstallments || isNaN(numberOfInstallments)) {
       errors.numberOfInstallments = "Valid Number of Installments is required";
     }
     if (!bcAmount || isNaN(bcAmount))
       errors.bcAmount = "Valid Installment Amount is required";
     if (!startDate) errors.startDate = "Start Date is required";
-    if (!endDate) errors.endDate = "End Date is required";
-    else if (new Date(startDate) > new Date(endDate))
-      errors.endDate = "End Date must be after Start Date";
 
     setErrors(errors);
     return Object.keys(errors).length === 0;
@@ -61,7 +95,6 @@ const TodoComponent = () => {
     };
 
     if (id) {
-      console.log(id);
       updateTodo(id, todo)
         .then(() => navigate("/todos"))
         .catch((error) => console.error(error));
@@ -83,7 +116,7 @@ const TodoComponent = () => {
           setBcAmount(response.data.bcAmount);
           setCompleted(response.data.completed);
           setStartDate(response.data.startDate);
-          setEndDate(response.data.endDate);
+          setEndDate(response.data.endDate); // Populate pre-existing end date
         })
         .catch((error) => console.error(error));
     }
@@ -94,7 +127,7 @@ const TodoComponent = () => {
       <br /> <br />
       <div className="row">
         <div className="card col-md-6 offset-md-3">
-          <h2 className="text-center">{id ? "Update BC" : "Add New BC"}</h2>
+          <h2 className="text-center">{id ? "Update Bicee" : "Add New Bicee"}</h2>
           <div className="card-body">
             <form>
               <div className="form-group mb-2">
@@ -106,9 +139,7 @@ const TodoComponent = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
-                {errors.title && (
-                  <small className="text-danger">{errors.title}</small>
-                )}
+                {errors.title && <small className="text-danger">{errors.title}</small>}
               </div>
 
               <div className="form-group mb-2">
@@ -120,9 +151,7 @@ const TodoComponent = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
-                {errors.description && (
-                  <small className="text-danger">{errors.description}</small>
-                )}
+                {errors.description && <small className="text-danger">{errors.description}</small>}
               </div>
 
               <div className="form-group mb-2">
@@ -138,9 +167,7 @@ const TodoComponent = () => {
                     </option>
                   ))}
                 </select>
-                {errors.frequency && (
-                  <small className="text-danger">{errors.frequency}</small>
-                )}
+                {errors.frequency && <small className="text-danger">{errors.frequency}</small>}
               </div>
 
               <div className="form-group mb-2">
@@ -153,9 +180,7 @@ const TodoComponent = () => {
                   onChange={(e) => setNumberOfInstallments(e.target.value)}
                 />
                 {errors.numberOfInstallments && (
-                  <small className="text-danger">
-                    {errors.numberOfInstallments}
-                  </small>
+                  <small className="text-danger">{errors.numberOfInstallments}</small>
                 )}
               </div>
 
@@ -168,9 +193,7 @@ const TodoComponent = () => {
                   value={bcAmount}
                   onChange={(e) => setBcAmount(e.target.value)}
                 />
-                {errors.bcAmount && (
-                  <small className="text-danger">{errors.bcAmount}</small>
-                )}
+                {errors.bcAmount && <small className="text-danger">{errors.bcAmount}</small>}
               </div>
 
               <div className="form-group mb-2">
@@ -181,22 +204,13 @@ const TodoComponent = () => {
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
                 />
-                {errors.startDate && (
-                  <small className="text-danger">{errors.startDate}</small>
-                )}
+                {errors.startDate && <small className="text-danger">{errors.startDate}</small>}
               </div>
 
+              {/* Display calculated end date (read-only) */}
               <div className="form-group mb-2">
                 <label className="form-label">End Date:</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-                {errors.endDate && (
-                  <small className="text-danger">{errors.endDate}</small>
-                )}
+                <input type="text" className="form-control" value={endDate} readOnly />
               </div>
 
               <button className="btn btn-success" onClick={saveOrUpdateTodo}>

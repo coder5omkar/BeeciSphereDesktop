@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams,useNavigate  } from "react-router-dom";
 import {
   getAllContries,
   deleteContry,
@@ -17,7 +17,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { FaUserEdit, FaTrash} from "react-icons/fa";
+import { FaUserEdit, FaTrash } from "react-icons/fa";
 
 // Register Chart.js components
 ChartJS.register(
@@ -32,6 +32,7 @@ ChartJS.register(
 const ContryComponent = () => {
   const { memberId, name } = useParams();
   const [contries, setContries] = useState([]);
+  const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [currentContry, setCurrentContry] = useState(null);
   const [chartData, setChartData] = useState({
@@ -156,20 +157,20 @@ const ContryComponent = () => {
                       <td>{contry.amount}</td>
                       <td>{contry.countryDate}</td>
                       <td>
-                      <button
-                      className="btn btn-info btn-sm mb-1 me-2"
-                      onClick={() => handleUpdateContryPopup(member.id)}
-                      title="Update Contry"
-                    >
-                      <FaUserEdit />
-                    </button>
-                    <button
-                      className="btn btn-danger btn-sm mb-1 me-2"
-                      onClick={() => handleDeleteContry(member.id)}
-                      title="Delete"
-                    >
-                      <FaTrash />
-                    </button>
+                        <button
+                          className="btn btn-info btn-sm mb-1 me-2"
+                          onClick={() => handleUpdateContryPopup(member.id)}
+                          title="Update Contry"
+                        >
+                          <FaUserEdit />
+                        </button>
+                        <button
+                          className="btn btn-danger btn-sm mb-1 me-2"
+                          onClick={() => handleDeleteContry(member.id)}
+                          title="Delete"
+                        >
+                          <FaTrash />
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -219,6 +220,11 @@ const ContryComponent = () => {
           <h3 className="text-center mb-4">Contributions Overview</h3>
           <Bar data={chartData} options={{ responsive: true }} />
         </div>
+      </div>
+      <div className="text-center mt-4">
+        <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+          Back
+        </button>
       </div>
     </div>
   );

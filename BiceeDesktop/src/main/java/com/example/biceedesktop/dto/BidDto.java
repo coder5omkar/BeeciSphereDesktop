@@ -9,6 +9,8 @@ public class BidDto {
     private Date bidDate;
     private Long todoId;
     private Long bidWinner;
+    private Double nextInstallAmt;
+    private Date nextInstallDate;
 
     public BidDto() {
     }
@@ -19,6 +21,32 @@ public class BidDto {
         this.bidDate = bidDate;
         this.todoId = todo;
         this.bidWinner = member;
+    }
+
+    public BidDto(Long id, Double bidAmount, Date bidDate, Long todoId, Long bidWinner, Double nextInstallAmt, Date nextInstallDate) {
+        this.id = id;
+        this.bidAmount = bidAmount;
+        this.bidDate = bidDate;
+        this.todoId = todoId;
+        this.bidWinner = bidWinner;
+        this.nextInstallAmt = nextInstallAmt;
+        this.nextInstallDate = nextInstallDate;
+    }
+
+    public Double getNextInstallAmt() {
+        return nextInstallAmt;
+    }
+
+    public void setNextInstallAmt(Double nextInstallAmt) {
+        this.nextInstallAmt = nextInstallAmt;
+    }
+
+    public Date getNextInstallDate() {
+        return nextInstallDate;
+    }
+
+    public void setNextInstallDate(Date nextInstallDate) {
+        this.nextInstallDate = nextInstallDate;
     }
 
     public java.lang.Long getId() {

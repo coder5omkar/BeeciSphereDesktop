@@ -20,7 +20,7 @@ public class Member {
     @Column(nullable = false)
     private String name; // Member's name
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email; // Member's email
 
     @Column(nullable = false)

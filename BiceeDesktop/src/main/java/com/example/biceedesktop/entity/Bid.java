@@ -20,12 +20,12 @@ public class Bid {
     private Date bidDate;
 
     @ManyToOne
-    @JoinColumn(name = "todo_id", nullable = false)
+    @JoinColumn(name = "todo_id", nullable = true)
     @JsonIgnore   // Prevent recursion
     private Todo todo;
 
     @OneToOne
-    @JoinColumn(name = "member_id", unique = true, nullable = false)
+    @JoinColumn(name = "member_id", unique = true, nullable = true)
     @JsonIgnore   // Prevent recursion
     private Member member;
 

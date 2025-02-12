@@ -30,6 +30,7 @@ const ListTodoComponent = () => {
   function updateTodo(id) {
     navigate(`/update-todo/${id}`);
   }
+  
 
   function removeTodo(id) {
     if (window.confirm("Are you sure you want to delete this BC?")) {
@@ -39,7 +40,7 @@ const ListTodoComponent = () => {
         })
         .catch((error) => {
           console.error(error);
-          alert("Failed to delete BC. Please try again.");
+          alert("Failed to delete Bicee. It having active members and contributions..delete them first to delete this Bicee");
         });
     }
   }
@@ -73,7 +74,7 @@ const ListTodoComponent = () => {
               <th>BC Title</th>
               <th>BC Description</th>
               <th>BC Frequency</th>
-              <th>Number of Installments</th>
+              <th>NOI/NOP</th>
               <th>Original Ins Amount</th>
               <th>Total Amount</th>
               <th>Start Date</th>

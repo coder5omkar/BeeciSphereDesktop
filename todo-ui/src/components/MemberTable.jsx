@@ -6,7 +6,14 @@ import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import { FaUserEdit, FaTrash, FaEye, FaPhone, FaFilePdf,FaMoneyBillWave } from "react-icons/fa";
+import {
+  FaUserEdit,
+  FaTrash,
+  FaEye,
+  FaPhone,
+  FaFilePdf,
+  FaMoneyBillWave,
+} from "react-icons/fa";
 
 const MemberTable = () => {
   const { todoId } = useParams();
@@ -69,16 +76,22 @@ const MemberTable = () => {
     navigate(`/members/${todoId}/edit/${memberId}`);
   };
 
-  const handleDeleteMember = async (memberId) => {
+  const handleDeleteMember = async (member) => {
+    if (member.bid) {
+      alert("This member has an active bid and cannot be deleted.");
+      return;
+    }
+  
     if (window.confirm("Are you sure you want to delete this member?")) {
       try {
-        await deleteMember(memberId);
+        await deleteMember(member.id);
         fetchMembers();
       } catch (error) {
         console.error("Error deleting member:", error);
       }
     }
   };
+  
 
   const handleViewMember = (member) => {
     setSelectedMember(member);
@@ -113,7 +126,15 @@ const MemberTable = () => {
   const handleWhatsAppContact = (member) => {
     setSelectedMember(member);
 
-    const { phoneNumber, name, amountReceived, maturityAmount, status, dateJoined, maturityDate } = member;
+    const {
+      phoneNumber,
+      name,
+      amountReceived,
+      maturityAmount,
+      status,
+      dateJoined,
+      maturityDate,
+    } = member;
 
     if (!phoneNumber || phoneNumber.trim() === "") {
       alert("या सदस्यासाठी मोबाइल नंबर उपलब्ध नाही.");
@@ -127,7 +148,11 @@ const MemberTable = () => {
       return;
     }
 
-    const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(dateJoined).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(maturityDate).toLocaleDateString()}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
+    const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(
+      dateJoined
+    ).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(
+      maturityDate
+    ).toLocaleDateString()}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
 
     const encodedMessage = encodeURIComponent(message);
 
@@ -154,6 +179,7 @@ const MemberTable = () => {
               <th>ID</th>
               <th>Name</th>
               <th>Amount Received</th>
+              <th>Bid Details</th>
               <th>Status</th>
               <th>Date Joined</th>
               <th>Maturity Date</th>
@@ -167,6 +193,13 @@ const MemberTable = () => {
                   <td>{member.id}</td>
                   <td>{member.name}</td>
                   <td>{member.amountReceived}</td>
+                  <td className="border p-2">
+                    {member.bid && member.bid.bidDate
+                      ? `${new Date(member.bid.bidDate).toLocaleDateString(
+                          "en-GB"
+                        )} bidWin at ®️ ${member.bid.bidAmount}`
+                      : "No bid yet"}
+                  </td>
                   <td>{member.status}</td>
                   <td>{new Date(member.dateJoined).toLocaleDateString()}</td>
                   <td>{new Date(member.maturityDate).toLocaleDateString()}</td>
@@ -187,7 +220,7 @@ const MemberTable = () => {
                     </button>
                     <button
                       className="btn btn-danger btn-sm mb-1 me-2"
-                      onClick={() => handleDeleteMember(member.id)}
+                      onClick={() => handleDeleteMember(member)}
                       title="Delete Member"
                     >
                       <FaTrash />
@@ -227,7 +260,6 @@ const MemberTable = () => {
               &times;
             </button>
             <h3 className="text-center">Member Details</h3>
-
             <div id="popup-content" className="popup-content">
               <div className="popup-details">
                 <p>
@@ -246,19 +278,23 @@ const MemberTable = () => {
                   <strong>Address:</strong> {selectedMember.address}
                 </p>
                 <p>
-                  <strong>Amount Received:</strong> {selectedMember.amountReceived}
+                  <strong>Amount Received:</strong>{" "}
+                  {selectedMember.amountReceived}
                 </p>
                 <p>
-                  <strong>Maturity Amount:</strong> {selectedMember.maturityAmount}
+                  <strong>Maturity Amount:</strong>{" "}
+                  {selectedMember.maturityAmount}
                 </p>
                 <p>
                   <strong>Status:</strong> {selectedMember.status}
                 </p>
                 <p>
-                  <strong>Date Joined:</strong> {new Date(selectedMember.dateJoined).toLocaleDateString()}
+                  <strong>Date Joined:</strong>{" "}
+                  {new Date(selectedMember.dateJoined).toLocaleDateString()}
                 </p>
                 <p>
-                  <strong>Maturity Date:</strong> {new Date(selectedMember.maturityDate).toLocaleDateString()}
+                  <strong>Maturity Date:</strong>{" "}
+                  {new Date(selectedMember.maturityDate).toLocaleDateString()}
                 </p>
               </div>
 
@@ -269,7 +305,10 @@ const MemberTable = () => {
                     labels: ["Amount Received", "Maturity Amount"],
                     datasets: [
                       {
-                        data: [selectedMember.amountReceived, selectedMember.maturityAmount],
+                        data: [
+                          selectedMember.amountReceived,
+                          selectedMember.maturityAmount,
+                        ],
                         backgroundColor: ["#4CAF50", "#FFC107"],
                       },
                     ],
@@ -278,9 +317,11 @@ const MemberTable = () => {
                 />
               </div>
             </div>
-
-            <button className="btn btn-success mt-3" onClick={handleDownloadPDF}>
-              Download PDF
+            <button
+              className="btn btn-success mt-3"
+              onClick={handleDownloadPDF}
+            >
+              <FaFilePdf className="me-2" title="Download PDF" />
             </button>
           </div>
         </div>

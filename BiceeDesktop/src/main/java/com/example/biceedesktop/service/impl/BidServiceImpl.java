@@ -41,6 +41,9 @@ public class BidServiceImpl implements BidService {
 
         bid.setMember(member);
         bid.setTodo(todo);
+
+
+
         Bid savedBid = bidRepository.save(bid);
         return mapToDto(savedBid);
     }
@@ -84,10 +87,15 @@ public class BidServiceImpl implements BidService {
         Bid bid = bidRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bid not found with id: " + id));
 
-        // Detach relations before deleting
-        bid.setMember(null);
-        bid.setTodo(null);
+        // Remove the reference from the Member entity
+        if (bid.getMember() != null) {
+            bid.getMember().setBid(null);
+        }
 
+        // Remove the reference from the Todo entity
+        if (bid.getTodo() != null) {
+            bid.getTodo().getBids().remove(bid);
+        }
         bidRepository.delete(bid);
     }
 

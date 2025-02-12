@@ -107,14 +107,24 @@ public class TodoServiceImpl implements TodoService {
 
     private TodoDto mapToDto(Todo todo) {
         return new TodoDto(
-                todo.getId(), todo.getTitle(), todo.getDescription(), todo.getFrequency(),
-                todo.getNumberOfInstallments(), todo.getBcAmount(), todo.isCompleted(),
-                todo.getStartDate(), todo.getEndDate(), todo.getCurrentInstDate(),
-                todo.getCurrentInstAmount(), todo.getNextInstAmount(), todo.getNextInstDate(),
-                todo.getBids().stream().map(Bid::getId).collect(Collectors.toList()),
-                todo.getMembers().stream().map(Member::getId).collect(Collectors.toList())
+                todo.getId(),
+                todo.getTitle(),
+                todo.getDescription(),
+                todo.getFrequency(),
+                todo.getNumberOfInstallments(),
+                todo.getBcAmount(),
+                todo.isCompleted(),
+                todo.getStartDate(),
+                todo.getEndDate(),
+                todo.getCurrentInstDate(),
+                todo.getCurrentInstAmount(),
+                todo.getNextInstAmount(),
+                todo.getNextInstDate(),
+                todo.getBids() != null ? todo.getBids().stream().map(Bid::getId).collect(Collectors.toList()) : null,
+                todo.getMembers() != null ? todo.getMembers().stream().map(Member::getId).collect(Collectors.toList()) : null
         );
     }
+
 
     private Todo mapToEntity(TodoDto todoDto) {
         return new Todo(null, todoDto.getTitle(), todoDto.getDescription(), todoDto.getFrequency(),

@@ -29,10 +29,10 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public MemberDto addMember(MemberDto memberDto) {
         // Check if a member with the same email already exists
-                Optional<Member> existingMember = memberRepository.findByEmail(memberDto.getEmail());
-        if (existingMember.isPresent()) {
-            throw new RuntimeException("A member with the email " + memberDto.getEmail() + " already exists.");
-        }
+//                Optional<Member> existingMember = memberRepository.findByEmail(memberDto.getEmail());
+//        if (existingMember.isPresent()) {
+//            throw new RuntimeException("A member with the email " + memberDto.getEmail() + " already exists.");
+//        }
 
         // Convert MemberDto to Member entity
         Member member = new Member();
