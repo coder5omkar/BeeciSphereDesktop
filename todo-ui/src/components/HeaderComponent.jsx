@@ -34,9 +34,9 @@ const HeaderComponent = () => {
   const resetTimer = () => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     inactivityTimer.current = setTimeout(() => {
-      alert("No activity detected for 10 minutes. Shutting down...");
+      alert("No activity detected for 3 hours. Shutting down...");
       handleShutdown();
-    }, 10 * 60 * 1000); // 10 minutes inactivity
+    }, 3 * 60 * 60 * 1000); // 3 hours inactivity (3 hours * 60 minutes * 60 seconds * 1000 milliseconds)
   };
 
   useEffect(() => {
@@ -93,7 +93,7 @@ const HeaderComponent = () => {
         </nav>
         <button
           className="shutdown-button position-fixed top-0 start-0 m-2"
-          onClick={handleShutdown} // Corrected onClick syntax
+          onClick={handleShutdown}
           title="Shutdown"
         >
           <FaPowerOff />

@@ -14,6 +14,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -46,9 +49,9 @@ public class BidServiceImpl implements BidService {
 
         Todo todo = todoRepository.findById(bidDto.getTodoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + bidDto.getTodoId()));
-
+        LocalDate bidDate = convertDateToLocalDate(bidDto.getBidDate());
         // Determine next installment date based on frequency
-        LocalDate nextInstDate = calculateNextInstDate(todo.getCurrentInstDate(), todo.getFrequency());
+        LocalDate nextInstDate = calculateNextInstDate(bidDate, todo.getFrequency());
         BigDecimal nextInstAmount = BigDecimal.valueOf(bidDto.getBidAmount())
                 .divide(BigDecimal.valueOf(todo.getNumberOfInstallments()), RoundingMode.HALF_UP)
                 .setScale(0, RoundingMode.HALF_UP); // Ensures a whole number
@@ -66,6 +69,12 @@ public class BidServiceImpl implements BidService {
         return mapToDto(savedBid);
     }
 
+    private LocalDate convertDateToLocalDate(Date date) {
+        return date.toInstant()              // Convert Date to Instant
+                .atZone(ZoneId.systemDefault()) // Convert Instant to ZonedDateTime using the system's default time zone
+                .toLocalDate();            // Convert ZonedDateTime to LocalDate
+    }
+
     // Helper method to calculate next installment date
     private LocalDate calculateNextInstDate(LocalDate currentInstDate, Frequency frequency) {
         if (currentInstDate == null) {
@@ -75,9 +84,9 @@ public class BidServiceImpl implements BidService {
         return switch (frequency) {
             case WEEKLY -> currentInstDate.plusDays(7);
             case BIWEEKLY -> currentInstDate.plusDays(14);
-            case MONTHLY -> currentInstDate.plusMonths(30);
+            case MONTHLY -> currentInstDate.plusMonths(1);
             case TENDAYS -> currentInstDate.plusDays(10);
-            case YEARLY -> currentInstDate.plusYears(365);
+            case YEARLY -> currentInstDate.plusYears(1);
         };
     }
 
