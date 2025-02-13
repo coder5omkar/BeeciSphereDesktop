@@ -86,7 +86,7 @@ const MemberTable = () => {
 
   const handleDeleteMember = async (member) => {
     if (member.bid) {
-      alert("This member has an active bid and cannot be deleted.");
+      alert("This member has an active bid/contribution and cannot be deleted.");
       return;
     }
 

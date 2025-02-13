@@ -63,7 +63,7 @@ const ContryComponent = () => {
   };
 
   const updateChartData = (contries) => {
-    const labels = contries.map((contry) => `Contry ${contry.id}`);
+    const labels = contries.map((contry) => `Contry ${contry.countryDate}`);
     const data = contries.map((contry) => contry.amount);
 
     setChartData({
@@ -159,14 +159,14 @@ const ContryComponent = () => {
                       <td>
                         <button
                           className="btn btn-info btn-sm mb-1 me-2"
-                          onClick={() => handleUpdateContryPopup(member.id)}
+                          onClick={() => handleUpdateContryPopup(contry.id)}
                           title="Update Contry"
                         >
                           <FaUserEdit />
                         </button>
                         <button
                           className="btn btn-danger btn-sm mb-1 me-2"
-                          onClick={() => handleDeleteContry(member.id)}
+                          onClick={() => handleDeleteContry(contry.id)}
                           title="Delete"
                         >
                           <FaTrash />

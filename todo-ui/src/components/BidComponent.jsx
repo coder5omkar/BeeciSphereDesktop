@@ -113,7 +113,7 @@ const BidComponent = () => {
     if (window.confirm("Are you sure you want to delete this bid?")) {
       BidService.deleteBid(bidId)
         .then(() => {
-          alert("Bid deleted successfully!");
+          // alert("Bid deleted successfully!");
           fetchMembers();
         })
         .catch((error) => console.error("Failed to delete bid:", error));
