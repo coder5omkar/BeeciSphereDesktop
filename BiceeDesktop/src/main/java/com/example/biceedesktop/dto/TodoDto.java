@@ -22,14 +22,11 @@ public class TodoDto {
     private LocalDate nextInstDate;
     private List<Long> bids;
     private List<Long> members;
+    private Double bcBalance;
 
     public TodoDto() {}
 
-    public TodoDto(Long id, String title, String description, Frequency frequency,
-                   Short numberOfInstallments, BigDecimal bcAmount, boolean completed,
-                   LocalDate startDate, LocalDate endDate, LocalDate currentInstDate,
-                   BigDecimal currentInstAmount, BigDecimal nextInstAmount, LocalDate nextInstDate,
-                   List<Long> bids, List<Long> members) {
+    public TodoDto(Long id, String title, String description, Frequency frequency, Short numberOfInstallments, BigDecimal bcAmount, boolean completed, LocalDate startDate, LocalDate endDate, LocalDate currentInstDate, BigDecimal currentInstAmount, BigDecimal nextInstAmount, LocalDate nextInstDate, List<Long> bids, List<Long> members, Double bcBalance) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -45,9 +42,11 @@ public class TodoDto {
         this.nextInstDate = nextInstDate;
         this.bids = bids;
         this.members = members;
+        this.bcBalance = bcBalance;
     }
 
-    // Getters and Setters (Generated)
+
+// Getters and Setters (Generated)
 
     public Long getId() {
         return id;
@@ -167,5 +166,13 @@ public class TodoDto {
 
     public void setMembers(List<Long> members) {
         this.members = members;
+    }
+
+    public Double getBcBalance() {
+        return bcBalance;
+    }
+
+    public void setBcBalance(Double bcBalance) {
+        this.bcBalance = bcBalance;
     }
 }

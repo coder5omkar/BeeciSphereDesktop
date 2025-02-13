@@ -121,7 +121,8 @@ public class TodoServiceImpl implements TodoService {
                 todo.getNextInstAmount(),
                 todo.getNextInstDate(),
                 todo.getBids() != null ? todo.getBids().stream().map(Bid::getId).collect(Collectors.toList()) : null,
-                todo.getMembers() != null ? todo.getMembers().stream().map(Member::getId).collect(Collectors.toList()) : null
+                todo.getMembers() != null ? todo.getMembers().stream().map(Member::getId).collect(Collectors.toList()) : null,
+                todo.getBiceeBalance()
         );
     }
 
@@ -131,6 +132,6 @@ public class TodoServiceImpl implements TodoService {
                 todoDto.getNumberOfInstallments(), todoDto.getBcAmount(),
                 todoDto.getStartDate(), todoDto.getEndDate(), todoDto.getCurrentInstDate(),
                 todoDto.getCurrentInstAmount(), todoDto.getNextInstAmount(), todoDto.getNextInstDate(),
-                todoDto.isCompleted(), null, null);
+                todoDto.isCompleted(), null,null, null);
     }
 }

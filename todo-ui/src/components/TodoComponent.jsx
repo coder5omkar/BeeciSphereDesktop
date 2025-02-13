@@ -13,7 +13,7 @@ const FrequencyEnum = {
 
 const TodoComponent = () => {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  // const [description, setDescription] = useState("");
   const [frequency, setFrequency] = useState(FrequencyEnum.MONTHLY);
   const [numberOfInstallments, setNumberOfInstallments] = useState("");
   const [bcAmount, setBcAmount] = useState("");
@@ -66,7 +66,7 @@ const TodoComponent = () => {
   function validateForm() {
     let errors = {};
     if (!title.trim()) errors.title = "Title is required";
-    if (!description.trim()) errors.description = "Description is required";
+    // if (!description.trim()) errors.description = "Description is required";
     if (!frequency) errors.frequency = "Frequency is required";
     if (!numberOfInstallments || isNaN(numberOfInstallments)) {
       errors.numberOfInstallments = "Valid Number of Installments is required";
@@ -85,7 +85,7 @@ const TodoComponent = () => {
 
     const todo = {
       title,
-      description,
+      // description,
       frequency,
       numberOfInstallments,
       bcAmount,
@@ -110,7 +110,7 @@ const TodoComponent = () => {
       getTodo(id)
         .then((response) => {
           setTitle(response.data.title);
-          setDescription(response.data.description);
+          // setDescription(response.data.description);
           setFrequency(response.data.frequency);
           setNumberOfInstallments(response.data.numberOfInstallments);
           setBcAmount(response.data.bcAmount);
@@ -142,7 +142,7 @@ const TodoComponent = () => {
                 {errors.title && <small className="text-danger">{errors.title}</small>}
               </div>
 
-              <div className="form-group mb-2">
+              {/* <div className="form-group mb-2">
                 <label className="form-label">BC Description:</label>
                 <input
                   type="text"
@@ -152,7 +152,7 @@ const TodoComponent = () => {
                   onChange={(e) => setDescription(e.target.value)}
                 />
                 {errors.description && <small className="text-danger">{errors.description}</small>}
-              </div>
+              </div> */}
 
               <div className="form-group mb-2">
                 <label className="form-label">BC Frequency:</label>
@@ -209,7 +209,7 @@ const TodoComponent = () => {
 
               {/* Display calculated end date (read-only) */}
               <div className="form-group mb-2">
-                <label className="form-label">End Date:</label>
+                <label className="form-label">Tentative End Date:</label>
                 <input type="text" className="form-control" value={endDate} readOnly />
               </div>
 

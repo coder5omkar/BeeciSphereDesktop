@@ -38,6 +38,7 @@ public class Todo {
     private LocalDate nextInstDate;
     private boolean completed;
 
+
     @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Member> members;
@@ -45,10 +46,11 @@ public class Todo {
     @OneToMany(mappedBy = "todo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Bid> bids;
+    private Double biceeBalance;
 
     public Todo() {}
 
-    public Todo(Long id, String title, String description, Frequency frequency, Short numberOfInstallments, BigDecimal bcAmount, LocalDate startDate, LocalDate endDate, LocalDate currentInstDate, BigDecimal currentInstAmount, BigDecimal nextInstAmount, LocalDate nextInstDate, boolean completed, List<Member> members, List<Bid> bids) {
+    public Todo(Long id, String title, String description, Frequency frequency, Short numberOfInstallments, BigDecimal bcAmount, LocalDate startDate, LocalDate endDate, LocalDate currentInstDate, BigDecimal currentInstAmount, BigDecimal nextInstAmount, LocalDate nextInstDate, boolean completed, List<Member> members, List<Bid> bids, Double biceeBalance) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -64,6 +66,7 @@ public class Todo {
         this.completed = completed;
         this.members = members;
         this.bids = bids;
+        this.biceeBalance = biceeBalance;
     }
 
     public Long getId() {
@@ -184,5 +187,13 @@ public class Todo {
 
     public void setBids(List<Bid> bids) {
         this.bids = bids;
+    }
+
+    public Double getBiceeBalance() {
+        return biceeBalance;
+    }
+
+    public void setBiceeBalance(Double biceeBalance) {
+        this.biceeBalance = biceeBalance;
     }
 }

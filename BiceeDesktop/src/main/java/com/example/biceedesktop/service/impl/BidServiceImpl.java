@@ -1,5 +1,6 @@
 package com.example.biceedesktop.service.impl;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.example.biceedesktop.dto.BidDto;
 import com.example.biceedesktop.entity.Bid;
 import com.example.biceedesktop.entity.Frequency;
@@ -57,6 +58,18 @@ public class BidServiceImpl implements BidService {
                 .setScale(0, RoundingMode.HALF_UP); // Ensures a whole number
 
         // Update Todo entity
+        Double totalBc = todo.getBcAmount().doubleValue() * todo.getNumberOfInstallments().doubleValue();
+        Double bcBalance = totalBc - bidDto.getBidAmount();
+
+//        System.out.println(bidDto.getBidAmount());
+//        System.out.println(bcBalance);
+
+        todo.setBiceeBalance(bcBalance);
+
+        if((todo.getNextInstDate() != null) && (todo.getNextInstAmount() != null)){
+            todo.setCurrentInstDate(todo.getNextInstDate());
+            todo.setCurrentInstAmount(todo.getNextInstAmount());
+        }
         todo.setNextInstDate(nextInstDate);
         todo.setNextInstAmount(nextInstAmount);
         todoRepository.save(todo);
@@ -98,29 +111,20 @@ public class BidServiceImpl implements BidService {
         return mapToDto(bid);
     }
 
-//    @Override
-//    public List<BidDto> getBidByMemberId(Long id) {
-//        return bidRepository.findByMemberId(id)
-//                .stream()
-//                .map(this::mapToDto)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    public List<BidDto> getAllBids() {
-//        return bidRepository.findAll()
-//                .stream()
-//                .map(this::mapToDto)
-//                .collect(Collectors.toList());
-//    }
-
     @Override
-    public BidDto updateBid(BidDto bidDto, java.lang.Long id) {
+    public BidDto updateBid(BidDto bidDto, Long id) {
         Bid bid = bidRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bid not found with id: " + id));
+
         bid.setAmount(bidDto.getBidAmount());
         bid.setBidDate(bidDto.getBidDate());
+
+        Member member = memberRepository.findById(bidDto.getBidWinner())
+                .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + bidDto.getBidWinner()));
+
+        bid.setMember(member);
         Bid updatedBid = bidRepository.save(bid);
+
         return mapToDto(updatedBid);
     }
 
@@ -129,6 +133,13 @@ public class BidServiceImpl implements BidService {
     public void deleteBid(java.lang.Long id) {
         Bid bid = bidRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Bid not found with id: " + id));
+
+        Todo todo = bid.getTodo();
+        todo.setNextInstDate(todo.getCurrentInstDate());
+        todo.setNextInstAmount(todo.getCurrentInstAmount());
+        todo.setCurrentInstDate(null);
+        todo.setCurrentInstAmount(null);
+        todoRepository.save(todo);
 
         // Remove the reference from the Member entity
         if (bid.getMember() != null) {

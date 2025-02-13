@@ -16,11 +16,8 @@ const ListTodoComponent = () => {
   function listTodos() {
     getAllTodos()
       .then((response) => {
-        // Sort by nextInstDate descending before setting state
-        const sortedTodos = response.data.sort(
-          (a, b) => new Date(b.nextInstDate) - new Date(a.nextInstDate)
-        );
-        setTodos(sortedTodos);
+        // Preserve the original order of todos
+        setTodos(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -58,11 +55,46 @@ const ListTodoComponent = () => {
     navigate(`/bids/${todo.id}`);
   }
 
-  // Pagination logic
+  function getCellColor(nextInstDate) {
+    if (!nextInstDate) return "";
+    const today = new Date();
+    const installmentDate = new Date(nextInstDate);
+    const diffInDays = (installmentDate - today) / (1000 * 60 * 60 * 24);
+
+    if (diffInDays < 0) return "table-danger"; // Red for overdue
+    if (diffInDays <= 3) return "table-warning"; // Yellow for due in 3 days
+    return "table-success"; // Green otherwise
+  }
+
+  // Function to sort todos by priority (overdue, due soon, on-time)
+  const getPrioritySortedTodos = (todos) => {
+    return todos.slice().sort((a, b) => {
+      const aPriority = getPriorityLevel(a.nextInstDate);
+      const bPriority = getPriorityLevel(b.nextInstDate);
+
+      // Higher priority (overdue) comes first
+      return bPriority - aPriority;
+    });
+  };
+
+  // Function to determine priority level
+  const getPriorityLevel = (nextInstDate) => {
+    if (!nextInstDate) return 0; // No priority if no date
+    const today = new Date();
+    const installmentDate = new Date(nextInstDate);
+    const diffInDays = (installmentDate - today) / (1000 * 60 * 60 * 24);
+
+    if (diffInDays < 0) return 3; // Overdue (highest priority)
+    if (diffInDays <= 3) return 2; // Due soon
+    return 1; // On-time
+  };
+
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-  const currentTodos = todos.slice(indexOfFirstTodo, indexOfLastTodo);
-
+  const currentTodos = getPrioritySortedTodos(todos).slice(
+    indexOfFirstTodo,
+    indexOfLastTodo
+  );
   const totalPages = Math.ceil(todos.length / todosPerPage);
 
   return (
@@ -77,14 +109,15 @@ const ListTodoComponent = () => {
             <tr>
               <th>BC Id</th>
               <th>BC Title</th>
-              <th>BC Description</th>
+              {/* <th>BC Description</th> */}
               <th>BC Frequency</th>
               <th>NOI/NOP</th>
               <th>Original Ins Amount</th>
               <th>Total Amount</th>
               <th>Start Date</th>
-              <th>Next Installment</th> {/* New Column */}
-              <th>End Date</th>
+              <th>Previous Installment</th>
+              <th>Next Installment</th>
+              <th>Bicee Balance</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -93,13 +126,26 @@ const ListTodoComponent = () => {
               <tr key={todo.id}>
                 <td>{todo.id}</td>
                 <td>{todo.title}</td>
-                <td>{todo.description}</td>
+                {/* <td>{todo.description}</td> */}
                 <td>{todo.frequency}</td>
                 <td>{todo.numberOfInstallments}</td>
                 <td>{todo.bcAmount}</td>
                 <td>{todo.numberOfInstallments * todo.bcAmount}</td>
                 <td>{todo.startDate}</td>
                 <td>
+                  {todo.currentInstAmount && todo.currentInstDate ? (
+                    `Last Inst ®️ ${todo.currentInstAmount} on ${new Date(
+                      todo.currentInstDate
+                    ).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "2-digit",
+                    })}`
+                  ) : (
+                    "N/A"
+                  )}
+                </td>
+                <td className={getCellColor(todo.nextInstDate)}>
                   {todo.nextInstAmount && todo.nextInstDate ? (
                     `Next Inst ®️ ${todo.nextInstAmount} on ${new Date(
                       todo.nextInstDate
@@ -112,7 +158,7 @@ const ListTodoComponent = () => {
                     "N/A"
                   )}
                 </td>
-                <td>{todo.endDate}</td>
+                <td>{todo.bcBalance !== null ? todo.bcBalance : "N/A"}</td>
                 <td>
                   <button
                     className="btn btn-info btn-sm mb-1 me-2"
@@ -148,7 +194,6 @@ const ListTodoComponent = () => {
           </tbody>
         </table>
 
-        {/* Pagination Controls - only show if there are more than 10 records */}
         {todos.length > 10 && (
           <div className="d-flex justify-content-center mt-3">
             <button

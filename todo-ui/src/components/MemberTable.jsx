@@ -166,8 +166,8 @@ const MemberTable = () => {
   
     const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(
       dateJoined
-    ).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(
-      maturityDate
+    // ).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(
+    //   maturityDate
     ).toLocaleDateString()}${nextInstMessage}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
   
     const encodedMessage = encodeURIComponent(message);
@@ -214,7 +214,7 @@ const MemberTable = () => {
               <th>Bid Details</th>
               <th>Status</th>
               <th>Date Joined</th>
-              <th>Maturity Date</th>
+              {/* <th>Maturity Date</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -234,7 +234,7 @@ const MemberTable = () => {
                   </td>
                   <td>{member.status}</td>
                   <td>{new Date(member.dateJoined).toLocaleDateString()}</td>
-                  <td>{new Date(member.maturityDate).toLocaleDateString()}</td>
+                  {/* <td>{new Date(member.maturityDate).toLocaleDateString()}</td> */}
                   <td>
                     <button
                       className="btn btn-info btn-sm mb-1 me-2"
@@ -324,10 +324,10 @@ const MemberTable = () => {
                   <strong>Date Joined:</strong>{" "}
                   {new Date(selectedMember.dateJoined).toLocaleDateString()}
                 </p>
-                <p>
+                {/* <p>
                   <strong>Maturity Date:</strong>{" "}
                   {new Date(selectedMember.maturityDate).toLocaleDateString()}
-                </p>
+                </p> */}
               </div>
 
               <div className="popup-chart">
