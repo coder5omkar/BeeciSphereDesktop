@@ -14,7 +14,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -62,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDto getMember(java.lang.Long id) {
+    public MemberDto getMember(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + id));
         return mapToMemberDto(member);
@@ -77,7 +79,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public MemberDto updateMember(MemberDto memberDto, java.lang.Long id) {
+    public MemberDto updateMember(MemberDto memberDto, Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + id));
 
@@ -154,14 +156,20 @@ public class MemberServiceImpl implements MemberService {
         memberDto.setMaturityDate(member.getMaturityDate());
         memberDto.setTodoId(member.getTodo() != null ? member.getTodo().getId() : null);
 
+        List<ContryDto> contributions = null;
         // Map contributions
         if (member.getCountrys() != null) {
-            List<ContryDto> contributions = member.getCountrys().stream()
+            contributions = member.getCountrys().stream()
                     .map(this::mapToContryDto) // Use the mapToContryDto method
                     .collect(Collectors.toList());
             memberDto.setContributions(contributions);
         }
-
+        // Calculate total discount
+        BigDecimal totalDiscount = contributions.stream()
+                .map(ContryDto::getDiscount) // Extract discount values
+                .filter(Objects::nonNull) // Handle null values
+                .reduce(BigDecimal.ZERO, BigDecimal::add); // Sum all discounts
+        memberDto.setTotalDiscount(totalDiscount);
         // Map bid
         if (member.getBid() != null) {
             BidDto bidDto = new BidDto();
@@ -181,6 +189,8 @@ public class MemberServiceImpl implements MemberService {
         contryDto.setAmount(contry.getAmount());
         contryDto.setCountryDate(contry.getCountryDate());
         contryDto.setNumberOfInst(contry.getNumberOfInst());
+        contryDto.setDiscount(contry.getDiscount());
         return contryDto;
+
     }
 }

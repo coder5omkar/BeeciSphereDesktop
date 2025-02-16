@@ -1,6 +1,8 @@
 package com.example.biceedesktop.entity;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
@@ -18,12 +20,23 @@ public class Contry {
     @Temporal(TemporalType.DATE)
     private Date countryDate;
 
-    public Contry(Long id, BigInteger amount, Date countryDate, Short numberOfInst, Member member) {
+    @Column(nullable = false)
+    private Short numberOfInst;
+
+    @ManyToOne(cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "member_id",foreignKey = @ForeignKey(name = "FK_COUNTRY_MEMBER"), nullable = true)
+    private Member member;
+
+    @Column
+    private BigDecimal discount;
+
+    public Contry(Long id, BigInteger amount, Date countryDate, Short numberOfInst, Member member, BigDecimal discount) {
         this.id = id;
         this.amount = amount;
         this.countryDate = countryDate;
         this.numberOfInst = numberOfInst;
         this.member = member;
+        this.discount = discount;
     }
 
     public Contry() {
@@ -69,12 +82,11 @@ public class Contry {
         return member;
     }
 
-    @Column(nullable = false)
-    private Short numberOfInst;
+    public BigDecimal getDiscount() {
+        return discount;
+    }
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "member_id",foreignKey = @ForeignKey(name = "FK_COUNTRY_MEMBER"), nullable = true)
-    private Member member;
-
-
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
+    }
 }

@@ -84,7 +84,7 @@ const AddContryComponent = ({ memberId, contryId, onClose, onContryAdded, contry
               required
             />
           </div>
-          <div className="form-group">
+          {/* <div className="form-group">
             <label>Number of Installments:</label>
             <input
               type="number"
@@ -94,7 +94,7 @@ const AddContryComponent = ({ memberId, contryId, onClose, onContryAdded, contry
               className="form-control"
               required
             />
-          </div>
+          </div> */}
           <div className="form-group">
             <label>Member ID:</label>
             <input

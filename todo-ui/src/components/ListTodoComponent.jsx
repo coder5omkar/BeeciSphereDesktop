@@ -63,7 +63,7 @@ const ListTodoComponent = () => {
 
     if (diffInDays < 0) return "table-danger"; // Red for overdue
     if (diffInDays <= 3) return "table-warning"; // Yellow for due in 3 days
-    return "table-success"; // Green otherwise
+    return "";
   }
 
   // Function to sort todos by priority (overdue, due soon, on-time)
@@ -85,7 +85,7 @@ const ListTodoComponent = () => {
     const diffInDays = (installmentDate - today) / (1000 * 60 * 60 * 24);
 
     if (diffInDays < 0) return 3; // Overdue (highest priority)
-    if (diffInDays <= 3) return 2; // Due soon
+    if (diffInDays <= 2) return 2; // Due soon
     return 1; // On-time
   };
 
@@ -115,8 +115,8 @@ const ListTodoComponent = () => {
               <th>Original Ins Amount</th>
               <th>Total Amount</th>
               <th>Start Date</th>
-              <th>Previous Installment</th>
-              <th>Next Installment</th>
+              <th>Previous Install for NB</th>
+              <th>Next Install for NB</th>
               <th>Bicee Balance</th>
               <th>Actions</th>
             </tr>

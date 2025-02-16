@@ -19,6 +19,7 @@ public class MemberDto {
     private Long todoId; // Instead of List<Todo>, we store the ID
     private List<ContryDto> contributions; // To include country details
     private BidDto bid; // Include bid details
+    private BigDecimal totalDiscount;
 
     public MemberDto() {
     }
@@ -37,6 +38,23 @@ public class MemberDto {
         this.todoId = todoId;
         this.contributions = contributions;
         this.bid = bid;
+    }
+
+    public MemberDto(Long id, String name, String email, String phoneNumber, String address, BigDecimal amountReceived, BigDecimal maturityAmount, MemberStatus status, Date dateJoined, Date maturityDate, Long todoId, List<ContryDto> contributions, BidDto bid, BigDecimal totalDiscount) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.address = address;
+        this.amountReceived = amountReceived;
+        this.maturityAmount = maturityAmount;
+        this.status = status;
+        this.dateJoined = dateJoined;
+        this.maturityDate = maturityDate;
+        this.todoId = todoId;
+        this.contributions = contributions;
+        this.bid = bid;
+        this.totalDiscount = totalDiscount;
     }
 
     // Getters and Setters
@@ -142,5 +160,13 @@ public class MemberDto {
 
     public void setBid(BidDto bid) {
         this.bid = bid;
+    }
+
+    public BigDecimal getTotalDiscount() {
+        return totalDiscount;
+    }
+
+    public void setTotalDiscount(BigDecimal totalDiscount) {
+        this.totalDiscount = totalDiscount;
     }
 }

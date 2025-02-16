@@ -58,40 +58,16 @@ const BidComponent = () => {
       .catch(() => setMembers([]));
   };
 
-  const calculateNextInstallDate = (bidDate, frequency) => {
-    const date = new Date(bidDate);
-    switch (frequency) {
-      case FrequencyEnum.TENDAYS:
-        date.setDate(date.getDate() + 10);
-        break;
-      case FrequencyEnum.WEEKLY:
-        date.setDate(date.getDate() + 7);
-        break;
-      case FrequencyEnum.BIWEEKLY:
-        date.setDate(date.getDate() + 15);
-        break;
-      case FrequencyEnum.MONTHLY:
-        date.setMonth(date.getMonth() + 1);
-        break;
-      case FrequencyEnum.YEARLY:
-        date.setFullYear(date.getFullYear() + 1);
-        break;
-      default:
-        break;
-    }
-    return date.toISOString().split("T")[0];
-  };
-
   const handleSaveBid = () => {
     if (!validateInputs()) return;
-  
+
     const bidData = {
       todoId: parseInt(todoId),
       bidDate,
       bidAmount: parseFloat(bidAmount),
       bidWinner: parseInt(bidWinner) || null, // Ensure it's an integer
     };
-  
+
     if (editingBid) {
       BidService.updateBid(editingBid.id, bidData).then(() => {
         alert("Bid updated successfully!");
@@ -103,11 +79,11 @@ const BidComponent = () => {
         fetchMembers();
       });
     }
-  
+
     setBidDate("");
     setBidAmount("");
     setBidWinner("");
-  };  
+  };
 
   const handleDeleteBid = (bidId) => {
     if (window.confirm("Are you sure you want to delete this bid?")) {
@@ -137,7 +113,9 @@ const BidComponent = () => {
       <h2 className="text-center mb-4">Manage Bids for BC {todoId}</h2>
       <div className="card shadow-sm mb-4">
         <div className="card-body">
-          <h4 className="card-title">{editingBid ? "Edit Bid" : "Add New Bid"}</h4>
+          <h4 className="card-title">
+            {editingBid ? "Edit Bid" : "Add New Bid"}
+          </h4>
           <div className="row">
             <div className="col-md-4">
               <label>Bid Date</label>
@@ -147,7 +125,9 @@ const BidComponent = () => {
                 value={bidDate}
                 onChange={(e) => setBidDate(e.target.value)}
               />
-              {errors.bidDate && <small className="text-danger">{errors.bidDate}</small>}
+              {errors.bidDate && (
+                <small className="text-danger">{errors.bidDate}</small>
+              )}
             </div>
             <div className="col-md-4">
               <label>Bid Amount</label>
@@ -157,7 +137,9 @@ const BidComponent = () => {
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
               />
-              {errors.bidAmount && <small className="text-danger">{errors.bidAmount}</small>}
+              {errors.bidAmount && (
+                <small className="text-danger">{errors.bidAmount}</small>
+              )}
             </div>
             {availableMembers.length > 0 && (
               <div className="col-md-4">
@@ -174,7 +156,9 @@ const BidComponent = () => {
                     </option>
                   ))}
                 </select>
-                {errors.bidWinner && <small className="text-danger">{errors.bidWinner}</small>}
+                {errors.bidWinner && (
+                  <small className="text-danger">{errors.bidWinner}</small>
+                )}
               </div>
             )}
           </div>
@@ -182,7 +166,10 @@ const BidComponent = () => {
             {editingBid ? "Update Bid" : "Save Bid"}
           </button>
           {editingBid && (
-            <button className="btn btn-secondary mt-3 ms-2" onClick={() => setEditingBid(null)}>
+            <button
+              className="btn btn-secondary mt-3 ms-2"
+              onClick={() => setEditingBid(null)}
+            >
               Cancel
             </button>
           )}
@@ -207,12 +194,21 @@ const BidComponent = () => {
                   <td>{bid.id}</td>
                   <td>{bid.bidDate}</td>
                   <td>{bid.bidAmount}</td>
-                  <td>{members.find((m) => m.id === parseInt(bid.bidWinner))?.name || "Unknown"}</td>
                   <td>
-                    <button className="btn btn-warning btn-sm me-2" onClick={() => handleEditBid(bid)}>
+                    {members.find((m) => m.id === parseInt(bid.bidWinner))
+                      ?.name || "Unknown"}
+                  </td>
+                  <td>
+                    <button
+                      className="btn btn-warning btn-sm me-2"
+                      onClick={() => handleEditBid(bid)}
+                    >
                       Edit
                     </button>
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDeleteBid(bid.id)}>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDeleteBid(bid.id)}
+                    >
                       Delete
                     </button>
                   </td>
@@ -222,6 +218,11 @@ const BidComponent = () => {
           </table>
         </div>
       </div>
+      <div className="text-center mt-4">
+          <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+            Back
+          </button>
+        </div>
     </div>
   );
 };

@@ -3,15 +3,20 @@ package com.example.biceedesktop.service.impl;
 import com.example.biceedesktop.dto.ContryDto;
 import com.example.biceedesktop.entity.Contry;
 import com.example.biceedesktop.entity.Member;
+import com.example.biceedesktop.entity.Todo;
 import com.example.biceedesktop.exception.ResourceNotFoundException;
 import com.example.biceedesktop.repository.ContryRepository;
 import com.example.biceedesktop.repository.MemberRepository;
+import com.example.biceedesktop.repository.TodoRepository;
 import com.example.biceedesktop.service.ContryService;
+import com.example.biceedesktop.service.MemberService;
+import com.example.biceedesktop.service.TodoService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,12 +30,23 @@ public class ContryServiceImpl implements ContryService {
     private  MemberRepository memberRepository;
 
     @Autowired
-    private EntityManager entityManager;
+    private TodoRepository todoRepository;
 
     @Override
     public ContryDto addContry(ContryDto contryDto) {
         Contry contry = mapToEntity(contryDto);
         Member member = memberRepository.getById(contryDto.getMemberId());
+        List<ContryDto> countries = contryRepository.findByMemberId(contryDto.getMemberId())
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        contry.setNumberOfInst((short) (countries.size() + 1));
+
+        Todo todo = todoRepository.getById(member.getTodo().getId());
+        BigDecimal installment = todo.getBcAmount();
+        installment = installment.subtract(new BigDecimal(contryDto.getAmount()));
+        contry.setDiscount(installment);
         contry.setMember(member);
         Contry savedContry = contryRepository.save(contry);
         return mapToDto(savedContry);
@@ -89,7 +105,8 @@ public class ContryServiceImpl implements ContryService {
                 contry.getAmount(),
                 contry.getCountryDate(),
                 contry.getNumberOfInst(),
-                contry.getMember().getId()
+                contry.getMember().getId(),
+                contry.getDiscount()
         );
     }
 
@@ -97,7 +114,7 @@ public class ContryServiceImpl implements ContryService {
         Contry contry = new Contry();
         contry.setAmount(contryDto.getAmount());
         contry.setCountryDate(contryDto.getCountryDate());
-        contry.setNumberOfInst(contryDto.getNumberOfInst());
+        contry.setNumberOfInst((short) 0);
         return contry;
     }
 }

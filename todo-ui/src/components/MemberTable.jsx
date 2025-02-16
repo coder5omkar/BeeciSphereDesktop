@@ -69,6 +69,7 @@ const MemberTable = () => {
             0
           ),
           maturityAmount: maturityAmount,
+          isBidWinner: member.bid !== null, // If bid exists, mark as winner
         }))
       );
     } catch (error) {
@@ -86,7 +87,9 @@ const MemberTable = () => {
 
   const handleDeleteMember = async (member) => {
     if (member.bid) {
-      alert("This member has an active bid/contribution and cannot be deleted.");
+      alert(
+        "This member has an active bid/contribution and cannot be deleted."
+      );
       return;
     }
 
@@ -132,7 +135,7 @@ const MemberTable = () => {
 
   const handleWhatsAppContact = (member) => {
     setSelectedMember(member);
-  
+
     const {
       phoneNumber,
       name,
@@ -141,37 +144,45 @@ const MemberTable = () => {
       status,
       dateJoined,
       maturityDate,
+      isBidWinner, // Assuming there's a flag to check if the member won a bid
     } = member;
-  
+
     if (!phoneNumber || phoneNumber.trim() === "") {
       alert("या सदस्यासाठी मोबाइल नंबर उपलब्ध नाही.");
       return;
     }
-  
+
     const cleanedPhoneNumber = phoneNumber.replace(/\D/g, "");
-  
+
     if (cleanedPhoneNumber.length < 10) {
       alert("अवैध मोबाइल नंबर. Please check/update member details..");
       return;
     }
-  
-    // Add next installment details to the message
-    const nextInstMessage = nextInstAmount && nextInstDate
-      ? `\n- पुढील हप्ता: ₹${nextInstAmount} on ${new Date(nextInstDate).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "2-digit",
-        })}`
-      : "\n- पुढील हप्ता: No upcoming installment.";
-  
+
+    // Determine next installment amount based on bid status
+    const nextInstallmentAmount = isBidWinner
+      ? installmentAmount
+      : nextInstAmount;
+
+    const nextInstMessage =
+      nextInstallmentAmount && nextInstDate
+        ? `\n- पुढील हप्ता: ₹${nextInstallmentAmount} on ${new Date(
+            nextInstDate
+          ).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "2-digit",
+          })}`
+        : "\n- पुढील हप्ता: No upcoming installment.";
+
     const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(
       dateJoined
-    // ).toLocaleDateString()}\n- परिपक्वता तारीख: ${new Date(
-    //   maturityDate
+    ).toLocaleDateString()} \n- परिपक्वता तारीख: ${new Date(
+      maturityDate
     ).toLocaleDateString()}${nextInstMessage}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
-  
+
     const encodedMessage = encodeURIComponent(message);
-  
+
     const whatsappUrl = `whatsapp://send?phone=${cleanedPhoneNumber}&text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
   };
@@ -185,7 +196,24 @@ const MemberTable = () => {
           <br />
           {nextInstAmount && nextInstDate ? (
             <small>
-              <strong>Next Inst:</strong> ®️ ₹{nextInstAmount} on{" "}
+              <strong>Next Inst for Non-Bid winner:</strong> ®️ ₹
+              {nextInstAmount} on{" "}
+              {new Date(nextInstDate).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "2-digit",
+              })}
+            </small>
+          ) : (
+            <small>
+              <strong>Next Inst:</strong> No upcoming installment.
+            </small>
+          )}
+          <br />
+          {installmentAmount && nextInstDate ? (
+            <small>
+              <strong>Next Inst for Bid winner:</strong> ®️ ₹{installmentAmount}{" "}
+              on{" "}
               {new Date(nextInstDate).toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
@@ -199,7 +227,11 @@ const MemberTable = () => {
           )}
         </div>
 
-        <button className="btn btn-primary" onClick={handleAddMember}>
+        <button
+          className="btn btn-primary btn-sm"
+          style={{ padding: "8px 16px", fontSize: "14px" }}
+          onClick={handleAddMember}
+        >
           Add Member
         </button>
       </div>
@@ -211,6 +243,7 @@ const MemberTable = () => {
               <th>ID</th>
               <th>Name</th>
               <th>Amount Received</th>
+              <th>Total Bonus</th>
               <th>Bid Details</th>
               <th>Status</th>
               <th>Date Joined</th>
@@ -225,6 +258,7 @@ const MemberTable = () => {
                   <td>{member.id}</td>
                   <td>{member.name}</td>
                   <td>{member.amountReceived}</td>
+                  <td>{member.totalDiscount}</td>
                   <td className="border p-2">
                     {member.bid && member.bid.bidDate
                       ? `${new Date(member.bid.bidDate).toLocaleDateString(

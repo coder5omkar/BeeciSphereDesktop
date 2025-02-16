@@ -1,5 +1,6 @@
 package com.example.biceedesktop.dto;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Date;
 
@@ -7,20 +8,21 @@ public class ContryDto {
 
     private Long id;
     private BigInteger amount;
-
-    public ContryDto() {
-    }
-
     private Date countryDate;
     private Short numberOfInst;
     private Long memberId;
+    private BigDecimal discount;
 
-    public ContryDto(Long id, BigInteger amount, Date countryDate, Short numberOfInst, Long memberId) {
+    public ContryDto(Long id, BigInteger amount, Date countryDate, Short numberOfInst, Long memberId, BigDecimal discount) {
         this.id = id;
         this.amount = amount;
         this.countryDate = countryDate;
         this.numberOfInst = numberOfInst;
         this.memberId = memberId;
+        this.discount = discount;
+    }
+
+    public ContryDto() {
     }
 
     public Long getId() {
@@ -61,5 +63,13 @@ public class ContryDto {
 
     public Long getMemberId() {
         return memberId;
+    }
+
+    public BigDecimal getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(BigDecimal discount) {
+        this.discount = discount;
     }
 }
