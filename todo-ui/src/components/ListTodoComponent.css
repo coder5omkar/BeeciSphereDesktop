@@ -1,0 +1,10 @@
+/* ListTodoComponent.css */
+.actions-column {
+    width: 250px; /* Adjust the width as needed */
+    min-width: 250px; /* Ensure the column doesn't shrink */
+  }
+  
+  .actions-column button {
+    margin: 2px; /* Add spacing between buttons */
+  }
+

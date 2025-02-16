@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { deleteTodo, getAllTodos } from "../services/TodoService";
 import { useNavigate } from "react-router-dom";
 import { FaUserEdit, FaTrash, FaEye, FaGavel } from "react-icons/fa";
+import "./ListTodoComponent.css"; // Import your custom CSS file
 
 const ListTodoComponent = () => {
   const [todos, setTodos] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const todosPerPage = 10;
+  const todosPerPage = 8;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,7 +17,6 @@ const ListTodoComponent = () => {
   function listTodos() {
     getAllTodos()
       .then((response) => {
-        // Preserve the original order of todos
         setTodos(response.data);
       })
       .catch((error) => {
@@ -68,35 +68,29 @@ const ListTodoComponent = () => {
 
   const getPrioritySortedTodos = (todos) => {
     if (todos.length === 0) return [];
-  
-    // Find the most recently updated todo
+
     const mostRecentTodo = todos.reduce((latest, todo) =>
       todo.updatesTs > latest.updatesTs ? todo : latest
     );
-  
-    // Filter out the most recently updated todo
+
     const remainingTodos = todos.filter(todo => todo !== mostRecentTodo);
-  
-    // Sort remaining todos by priority
+
     const sortedTodos = remainingTodos.sort((a, b) => {
       const aPriority = getPriorityLevel(a.nextInstDate);
       const bPriority = getPriorityLevel(b.nextInstDate);
       return bPriority - aPriority; // Higher priority first
     });
-  
-    // Place the most recently updated todo at the top
+
     return [mostRecentTodo, ...sortedTodos];
   };
-  
 
-  // Function to determine priority level
   const getPriorityLevel = (nextInstDate) => {
-    if (!nextInstDate) return 0; // No priority if no date
+    if (!nextInstDate) return 0;
     const today = new Date();
     const installmentDate = new Date(nextInstDate);
     const diffInDays = (installmentDate - today) / (1000 * 60 * 60 * 24);
 
-    if (diffInDays < 0) return 3; // Overdue (highest priority)
+    if (diffInDays < 0) return 3; // Overdue
     if (diffInDays <= 2) return 2; // Due soon
     return 1; // On-time
   };
@@ -121,7 +115,6 @@ const ListTodoComponent = () => {
             <tr>
               <th>BC Id</th>
               <th>BC Title</th>
-              {/* <th>BC Description</th> */}
               <th>BC Frequency</th>
               <th>NOI/NOP</th>
               <th>Original Ins Amount</th>
@@ -130,7 +123,7 @@ const ListTodoComponent = () => {
               <th>Previous Install for NB</th>
               <th>Next Install for NB</th>
               <th>Bicee Balance</th>
-              <th>Actions</th>
+              <th className="actions-column">Actions</th> {/* Add custom class */}
             </tr>
           </thead>
           <tbody>
@@ -138,7 +131,6 @@ const ListTodoComponent = () => {
               <tr key={todo.id}>
                 <td>{todo.id}</td>
                 <td>{todo.title}</td>
-                {/* <td>{todo.description}</td> */}
                 <td>{todo.frequency}</td>
                 <td>{todo.numberOfInstallments}</td>
                 <td>{todo.bcAmount}</td>
@@ -171,7 +163,7 @@ const ListTodoComponent = () => {
                   )}
                 </td>
                 <td>{todo.bcBalance !== null ? todo.bcBalance : "N/A"}</td>
-                <td>
+                <td className="actions-column"> {/* Add custom class */}
                   <button
                     className="btn btn-info btn-sm mb-1 me-2"
                     onClick={() => updateTodo(todo.id)}
@@ -206,7 +198,7 @@ const ListTodoComponent = () => {
           </tbody>
         </table>
 
-        {todos.length > 10 && (
+        {todos.length > 8 && (
           <div className="d-flex justify-content-center mt-3">
             <button
               className="btn btn-secondary"

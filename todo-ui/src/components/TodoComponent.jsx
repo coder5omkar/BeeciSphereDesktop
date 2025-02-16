@@ -131,7 +131,7 @@ const TodoComponent = () => {
           <div className="card-body">
             <form>
               <div className="form-group mb-2">
-                <label className="form-label">BC Title:</label>
+                <label className="form-label">Bicee Title:</label>
                 <input
                   type="text"
                   className="form-control"
@@ -155,7 +155,7 @@ const TodoComponent = () => {
               </div> */}
 
               <div className="form-group mb-2">
-                <label className="form-label">BC Frequency:</label>
+                <label className="form-label">Bicee Frequency:</label>
                 <select
                   className="form-control"
                   value={frequency}
@@ -171,7 +171,7 @@ const TodoComponent = () => {
               </div>
 
               <div className="form-group mb-2">
-                <label className="form-label">NOI:</label>
+                <label className="form-label">Number of People/Cycles:</label>
                 <input
                   type="text"
                   className="form-control"
@@ -185,7 +185,7 @@ const TodoComponent = () => {
               </div>
 
               <div className="form-group mb-2">
-                <label className="form-label">INS Amt:</label>
+                <label className="form-label">Cycle Installment :</label>
                 <input
                   type="text"
                   className="form-control"
