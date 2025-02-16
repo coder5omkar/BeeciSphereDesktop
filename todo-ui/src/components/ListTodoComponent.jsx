@@ -66,16 +66,28 @@ const ListTodoComponent = () => {
     return "";
   }
 
-  // Function to sort todos by priority (overdue, due soon, on-time)
   const getPrioritySortedTodos = (todos) => {
-    return todos.slice().sort((a, b) => {
+    if (todos.length === 0) return [];
+  
+    // Find the most recently updated todo
+    const mostRecentTodo = todos.reduce((latest, todo) =>
+      todo.updatesTs > latest.updatesTs ? todo : latest
+    );
+  
+    // Filter out the most recently updated todo
+    const remainingTodos = todos.filter(todo => todo !== mostRecentTodo);
+  
+    // Sort remaining todos by priority
+    const sortedTodos = remainingTodos.sort((a, b) => {
       const aPriority = getPriorityLevel(a.nextInstDate);
       const bPriority = getPriorityLevel(b.nextInstDate);
-
-      // Higher priority (overdue) comes first
-      return bPriority - aPriority;
+      return bPriority - aPriority; // Higher priority first
     });
+  
+    // Place the most recently updated todo at the top
+    return [mostRecentTodo, ...sortedTodos];
   };
+  
 
   // Function to determine priority level
   const getPriorityLevel = (nextInstDate) => {

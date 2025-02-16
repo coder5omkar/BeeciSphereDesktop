@@ -23,6 +23,7 @@ const BidComponent = () => {
   const [errors, setErrors] = useState({});
   const totalNumberOfInstallments = 10; // Define based on your logic
   const frequency = FrequencyEnum.MONTHLY; // Define based on your logic
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     fetchMembers();
@@ -51,33 +52,51 @@ const BidComponent = () => {
       .then((response) => {
         if (Array.isArray(response.data)) {
           setMembers(response.data);
+          setErrorMessage(""); // Clear any previous error messages
         } else {
           setMembers([]);
+          setErrorMessage("No members found for the given BC ID.");
         }
       })
-      .catch(() => setMembers([]));
+      .catch((error) => {
+        setMembers([]);
+        setErrorMessage("Failed to fetch members. Please try again later.");
+        console.error("Error fetching members:", error);
+      });
   };
 
-  const handleSaveBid = () => {
+  const handleSaveBid = async () => {
     if (!validateInputs()) return;
-
+  
     const bidData = {
       todoId: parseInt(todoId),
       bidDate,
       bidAmount: parseFloat(bidAmount),
-      bidWinner: parseInt(bidWinner) || null, // Ensure it's an integer
+      bidWinner: parseInt(bidWinner) || null,
     };
 
     if (editingBid) {
-      BidService.updateBid(editingBid.id, bidData).then(() => {
-        alert("Bid updated successfully!");
-        fetchMembers();
-        setEditingBid(null);
-      });
+      BidService.updateBid(editingBid.id, bidData)
+        .then(() => {
+          alert("Bid updated successfully!");
+          fetchMembers();
+          setEditingBid(null);
+          setErrorMessage(""); // Clear any previous error messages
+        })
+        .catch((error) => {
+          setErrorMessage("Failed to update bid. Please try again later.");
+          console.error("Error updating bid:", error);
+        });
     } else {
-      BidService.saveBid(bidData).then(() => {
-        fetchMembers();
-      });
+      BidService.saveBid(bidData)
+        .then(() => {
+          fetchMembers();
+          setErrorMessage(""); // Clear any previous error messages
+        })
+        .catch((error) => {
+          setErrorMessage("Failed to save bid. Please try again later. Check whether bid amount is greater than total Bicee Amount..");
+          console.error("Error saving bid:", error);
+        });
     }
 
     setBidDate("");
@@ -89,10 +108,13 @@ const BidComponent = () => {
     if (window.confirm("Are you sure you want to delete this bid?")) {
       BidService.deleteBid(bidId)
         .then(() => {
-          // alert("Bid deleted successfully!");
           fetchMembers();
+          setErrorMessage(""); // Clear any previous error messages
         })
-        .catch((error) => console.error("Failed to delete bid:", error));
+        .catch((error) => {
+          setErrorMessage("Failed to delete bid. Please try again later.");
+          console.error("Failed to delete bid:", error);
+        });
     }
   };
 
@@ -111,6 +133,11 @@ const BidComponent = () => {
   return (
     <div className="container">
       <h2 className="text-center mb-4">Manage Bids for BC {todoId}</h2>
+      {errorMessage && (
+        <div className="alert alert-danger" role="alert">
+          {errorMessage}
+        </div>
+      )}
       <div className="card shadow-sm mb-4">
         <div className="card-body">
           <h4 className="card-title">

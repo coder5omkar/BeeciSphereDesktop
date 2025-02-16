@@ -1,6 +1,4 @@
 package com.example.biceedesktop.service.impl;
-
-import ch.qos.logback.core.util.StringUtil;
 import com.example.biceedesktop.dto.BidDto;
 import com.example.biceedesktop.entity.Bid;
 import com.example.biceedesktop.entity.Frequency;
@@ -41,6 +39,7 @@ public class BidServiceImpl implements BidService {
     @Autowired
     private EntityManager entityManager;
 
+    @Transactional
     @Override
     public BidDto addBid(BidDto bidDto) {
         Bid bid = mapToEntity(bidDto);
@@ -51,18 +50,22 @@ public class BidServiceImpl implements BidService {
         Todo todo = todoRepository.findById(bidDto.getTodoId())
                 .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + bidDto.getTodoId()));
         LocalDate bidDate = convertDateToLocalDate(bidDto.getBidDate());
+
+        List<Member> members = memberRepository.findBytodoId(member.getTodo().getId());
+        int size = members.size();
         // Determine next installment date based on frequency
         LocalDate nextInstDate = calculateNextInstDate(bidDate, todo.getFrequency());
         BigDecimal nextInstAmount = BigDecimal.valueOf(bidDto.getBidAmount())
-                .divide(BigDecimal.valueOf(todo.getNumberOfInstallments()), RoundingMode.HALF_UP)
+                .divide(BigDecimal.valueOf(size-1), RoundingMode.HALF_UP)
                 .setScale(0, RoundingMode.HALF_UP); // Ensures a whole number
 
         // Update Todo entity
         Double totalBc = todo.getBcAmount().doubleValue() * todo.getNumberOfInstallments().doubleValue();
         Double bcBalance = totalBc - bidDto.getBidAmount();
 
-//        System.out.println(bidDto.getBidAmount());
-//        System.out.println(bcBalance);
+        if(totalBc < bidDto.getBidAmount()){
+            throw new RuntimeException("Total bid amount can not be more than total bicee amount");
+        }
 
         todo.setBiceeBalance(bcBalance);
 
@@ -72,6 +75,7 @@ public class BidServiceImpl implements BidService {
         }
         todo.setNextInstDate(nextInstDate);
         todo.setNextInstAmount(nextInstAmount);
+        todo.setUpdatesTs(new Date());
         todoRepository.save(todo);
 
         // Set bid details
@@ -122,6 +126,10 @@ public class BidServiceImpl implements BidService {
         Member member = memberRepository.findById(bidDto.getBidWinner())
                 .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + bidDto.getBidWinner()));
 
+        Todo todo = todoRepository.findById(member.getTodo().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + id));
+        todo.setUpdatesTs(new Date());
+        todoRepository.save(todo);
         bid.setMember(member);
         Bid updatedBid = bidRepository.save(bid);
 

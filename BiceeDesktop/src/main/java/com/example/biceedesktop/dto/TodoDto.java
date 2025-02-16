@@ -3,6 +3,7 @@ package com.example.biceedesktop.dto;
 import com.example.biceedesktop.entity.Frequency;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 public class TodoDto {
@@ -23,6 +24,7 @@ public class TodoDto {
     private List<Long> bids;
     private List<Long> members;
     private Double bcBalance;
+    private Date updatesTs;
 
     public TodoDto() {}
 
@@ -45,8 +47,27 @@ public class TodoDto {
         this.bcBalance = bcBalance;
     }
 
+    public TodoDto(Long id, String title, String description, Frequency frequency, Short numberOfInstallments, BigDecimal bcAmount, boolean completed, LocalDate startDate, LocalDate endDate, LocalDate currentInstDate, BigDecimal currentInstAmount, BigDecimal nextInstAmount, LocalDate nextInstDate, List<Long> bids, List<Long> members, Double bcBalance, Date updatesTs) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.frequency = frequency;
+        this.numberOfInstallments = numberOfInstallments;
+        this.bcAmount = bcAmount;
+        this.completed = completed;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.currentInstDate = currentInstDate;
+        this.currentInstAmount = currentInstAmount;
+        this.nextInstAmount = nextInstAmount;
+        this.nextInstDate = nextInstDate;
+        this.bids = bids;
+        this.members = members;
+        this.bcBalance = bcBalance;
+        this.updatesTs = updatesTs;
+    }
 
-// Getters and Setters (Generated)
+    // Getters and Setters (Generated)
 
     public Long getId() {
         return id;
@@ -174,5 +195,13 @@ public class TodoDto {
 
     public void setBcBalance(Double bcBalance) {
         this.bcBalance = bcBalance;
+    }
+
+    public Date getUpdatesTs() {
+        return updatesTs;
+    }
+
+    public void setUpdatesTs(Date updatesTs) {
+        this.updatesTs = updatesTs;
     }
 }

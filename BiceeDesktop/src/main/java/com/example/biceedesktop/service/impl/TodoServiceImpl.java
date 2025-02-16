@@ -13,6 +13,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,7 @@ public class TodoServiceImpl implements TodoService {
     @Override
     public TodoDto addTodo(TodoDto todoDto) {
         Todo todo = mapToEntity(todoDto);
+        todo.setUpdatesTs(new Date());
         Todo savedTodo = todoRepository.save(todo);
         return mapToDto(savedTodo);
     }
@@ -66,6 +69,7 @@ public class TodoServiceImpl implements TodoService {
         todo.setCurrentInstAmount(todoDto.getCurrentInstAmount());
         todo.setNextInstAmount(todoDto.getNextInstAmount());
         todo.setNextInstDate(todoDto.getNextInstDate());
+        todo.setUpdatesTs(new Date());
 
         Todo updatedTodo = todoRepository.save(todo);
         return mapToDto(updatedTodo);
@@ -122,7 +126,8 @@ public class TodoServiceImpl implements TodoService {
                 todo.getNextInstDate(),
                 todo.getBids() != null ? todo.getBids().stream().map(Bid::getId).collect(Collectors.toList()) : null,
                 todo.getMembers() != null ? todo.getMembers().stream().map(Member::getId).collect(Collectors.toList()) : null,
-                todo.getBiceeBalance()
+                todo.getBiceeBalance(),
+                todo.getUpdatesTs()
         );
     }
 

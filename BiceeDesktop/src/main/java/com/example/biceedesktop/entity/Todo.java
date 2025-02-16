@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -17,7 +18,7 @@ public class Todo {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String description;
 
     @Enumerated(EnumType.ORDINAL)
@@ -47,6 +48,8 @@ public class Todo {
     @JsonIgnore
     private List<Bid> bids;
     private Double biceeBalance;
+
+    private Date updatesTs;
 
     public Todo() {}
 
@@ -195,5 +198,13 @@ public class Todo {
 
     public void setBiceeBalance(Double biceeBalance) {
         this.biceeBalance = biceeBalance;
+    }
+
+    public Date getUpdatesTs() {
+        return updatesTs;
+    }
+
+    public void setUpdatesTs(Date updatesTs) {
+        this.updatesTs = updatesTs;
     }
 }
