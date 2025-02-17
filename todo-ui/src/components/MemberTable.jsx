@@ -178,8 +178,8 @@ const MemberTable = () => {
 
     const message = `नमस्कार ${name},\n\nतुमच्या सदस्यता तपशीलांविषयी माहिती:\n\n- नाव: ${name}\n- प्राप्त रक्कम: ₹${amountReceived}\n- परिपक्वता रक्कम: ₹${maturityAmount}\n- स्थिती: ${status}\n- सामील होण्याची तारीख: ${new Date(
       dateJoined
-    ).toLocaleDateString()} \n- परिपक्वता तारीख: ${new Date(
-      maturityDate
+    // ).toLocaleDateString()} \n- परिपक्वता तारीख: ${new Date(
+    //   maturityDate
     ).toLocaleDateString()}${nextInstMessage}\n\nकृपया वरील माहिती तपासा आणि आम्हाला अद्यतनित करा. धन्यवाद!`;
 
     const encodedMessage = encodeURIComponent(message);

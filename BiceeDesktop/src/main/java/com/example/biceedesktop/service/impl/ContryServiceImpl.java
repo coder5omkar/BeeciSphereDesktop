@@ -103,6 +103,11 @@ public class ContryServiceImpl implements ContryService {
     @Transactional
     @Override
     public void addBulkContributions(Long todoId, List<Long> memberIds, double amount) {
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + todoId));
+        BigDecimal installment = todo.getBcAmount();
+        installment = installment.subtract(new BigDecimal(amount));
+
         for (Long memberId : memberIds) {
             Member member = memberRepository.findById(memberId)
                     .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + memberId));
@@ -116,6 +121,7 @@ public class ContryServiceImpl implements ContryService {
             contry.setAmount(BigInteger.valueOf((long) amount));
             contry.setCountryDate(new Date());
             contry.setNumberOfInst((short) (countries.size() + 1));
+            contry.setDiscount(installment);
             contryRepository.save(contry);
         }
     }

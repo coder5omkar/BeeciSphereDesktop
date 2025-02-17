@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { isUserLoggedIn, logout } from "../services/AuthService";
-import { FaPowerOff } from "react-icons/fa";
+import { FaPowerOff, FaDownload } from "react-icons/fa";
 
 const HeaderComponent = () => {
   const isAuth = isUserLoggedIn();
@@ -31,12 +31,16 @@ const HeaderComponent = () => {
     }
   };
 
+  const handleDownload = () => {
+    window.location.href = "http://localhost:8080/api/excel/export";
+  };
+
   const resetTimer = () => {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     inactivityTimer.current = setTimeout(() => {
       alert("No activity detected for 3 hours. Shutting down...");
       handleShutdown();
-    }, 3 * 60 * 60 * 1000); // 3 hours inactivity (3 hours * 60 minutes * 60 seconds * 1000 milliseconds)
+    }, 3 * 60 * 60 * 1000);
   };
 
   useEffect(() => {
@@ -73,10 +77,7 @@ const HeaderComponent = () => {
               )}
               {isAuth && (
                 <li className="nav-item">
-                  <button
-                    className="btn btn-link nav-link"
-                    onClick={handleLogout}
-                  >
+                  <button className="btn btn-link nav-link" onClick={handleLogout}>
                     Logout
                   </button>
                 </li>
@@ -98,14 +99,20 @@ const HeaderComponent = () => {
         >
           <FaPowerOff />
         </button>
+        <button
+          className="download-button position-fixed top-0 end-0 m-2"
+          onClick={handleDownload}
+          title="Download Data"
+        >
+          <FaDownload />
+        </button>
       </header>
       <style>
         {`
-          .shutdown-button {
+          .shutdown-button, .download-button {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background-color: red;
             color: white;
             border: none;
             display: flex;
@@ -115,8 +122,17 @@ const HeaderComponent = () => {
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             transition: background-color 0.3s ease-in-out;
           }
+          .shutdown-button {
+            background-color: red;
+          }
           .shutdown-button:hover {
             background-color: darkred;
+          }
+          .download-button {
+            background-color: green;
+          }
+          .download-button:hover {
+            background-color: darkgreen;
           }
         `}
       </style>
