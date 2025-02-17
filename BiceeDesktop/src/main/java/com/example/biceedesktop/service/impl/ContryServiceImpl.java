@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -98,6 +100,25 @@ public class ContryServiceImpl implements ContryService {
         contryRepository.delete(contry);
     }
 
+    @Transactional
+    @Override
+    public void addBulkContributions(Long todoId, List<Long> memberIds, double amount) {
+        for (Long memberId : memberIds) {
+            Member member = memberRepository.findById(memberId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Member not found with id: " + memberId));
+            List<ContryDto> countries = contryRepository.findByMemberId(member.getId())
+                    .stream()
+                    .map(this::mapToDto)
+                    .collect(Collectors.toList());
+
+            Contry contry = new Contry();
+            contry.setMember(member);
+            contry.setAmount(BigInteger.valueOf((long) amount));
+            contry.setCountryDate(new Date());
+            contry.setNumberOfInst((short) (countries.size() + 1));
+            contryRepository.save(contry);
+        }
+    }
 
     private ContryDto mapToDto(Contry contry) {
         return new ContryDto(

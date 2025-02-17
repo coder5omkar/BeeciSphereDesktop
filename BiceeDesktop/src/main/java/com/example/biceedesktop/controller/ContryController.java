@@ -1,5 +1,6 @@
 package com.example.biceedesktop.controller;
 
+import com.example.biceedesktop.dto.BulkContributionRequest;
 import com.example.biceedesktop.dto.ContryDto;
 import com.example.biceedesktop.service.ContryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,5 +58,17 @@ public class ContryController {
     public ResponseEntity<String> deleteContry(@PathVariable("id") Long contryId) {
         contryService.deleteContry(contryId);
         return ResponseEntity.ok("Contry deleted successfully.");
+    }
+
+    @PostMapping("/bulk-update")
+    public ResponseEntity<String> bulkUpdateContributions(
+            @RequestBody BulkContributionRequest request) {
+
+        contryService.addBulkContributions(
+                request.getTodoId(),
+                request.getMemberIds(),
+                request.getAmount()
+        );
+        return ResponseEntity.ok("Bulk contributions updated successfully.");
     }
 }

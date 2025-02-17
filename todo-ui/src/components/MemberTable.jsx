@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getMemberByBCID, deleteMember } from "../services/MemberService";
+import { addBulkContributions } from "../services/ContryService"
 import { getTodo } from "../services/TodoService";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
@@ -24,8 +25,9 @@ const MemberTable = () => {
   const [numberOfInstallments, setNumberOfInstallments] = useState(0);
   const [installmentAmount, setInstallmentAmount] = useState(0);
   const [maturityAmount, setMaturityAmount] = useState(0);
-  const [nextInstAmount, setNextInstAmount] = useState(0); // New state for next installment amount
-  const [nextInstDate, setNextInstDate] = useState(null); // New state for next installment date
+  const [nextInstAmount, setNextInstAmount] = useState(0);
+  const [nextInstDate, setNextInstDate] = useState(null);
+  const [bulkContributionAmount, setBulkContributionAmount] = useState("");
 
   useEffect(() => {
     fetchTodoDetails();
@@ -41,8 +43,8 @@ const MemberTable = () => {
       setNumberOfInstallments(numberOfInstallments || 0);
       setInstallmentAmount(bcAmount || 0);
       setMaturityAmount(numberOfInstallments * bcAmount);
-      setNextInstAmount(nextInstAmount || 0); // Set next installment amount
-      setNextInstDate(nextInstDate || null); // Set next installment date
+      setNextInstAmount(nextInstAmount || 0);
+      setNextInstDate(nextInstDate || null);
     } catch (error) {
       console.error("Error fetching todo details:", error);
     }
@@ -69,7 +71,7 @@ const MemberTable = () => {
             0
           ),
           maturityAmount: maturityAmount,
-          isBidWinner: member.bid !== null, // If bid exists, mark as winner
+          isBidWinner: member.bid !== null,
         }))
       );
     } catch (error) {
@@ -144,7 +146,7 @@ const MemberTable = () => {
       status,
       dateJoined,
       maturityDate,
-      isBidWinner, // Assuming there's a flag to check if the member won a bid
+      isBidWinner,
     } = member;
 
     if (!phoneNumber || phoneNumber.trim() === "") {
@@ -159,7 +161,6 @@ const MemberTable = () => {
       return;
     }
 
-    // Determine next installment amount based on bid status
     const nextInstallmentAmount = isBidWinner
       ? installmentAmount
       : nextInstAmount;
@@ -185,6 +186,29 @@ const MemberTable = () => {
 
     const whatsappUrl = `whatsapp://send?phone=${cleanedPhoneNumber}&text=${encodedMessage}`;
     window.open(whatsappUrl, "_blank");
+  };
+
+  const handleBulkContribution = async (isBidWinner) => {
+    if (!bulkContributionAmount || isNaN(bulkContributionAmount)) {
+      alert("Please enter a valid amount for bulk contribution.");
+      return;
+    }
+
+    const membersToUpdate = members.filter(member => member.isBidWinner === isBidWinner);
+
+    if (membersToUpdate.length === 0) {
+      alert(`No ${isBidWinner ? "bid-winners" : "non-bid winners"} found.`);
+      return;
+    }
+
+    try {
+      await addBulkContributions(todoId, membersToUpdate.map(member => member.id), parseFloat(bulkContributionAmount));
+      alert("Bulk contributions added successfully.");
+      fetchMembers();
+    } catch (error) {
+      console.error("Error adding bulk contributions:", error);
+      alert("Failed to add bulk contributions.");
+    }
   };
 
   return (
@@ -236,6 +260,30 @@ const MemberTable = () => {
         </button>
       </div>
 
+      <div className="mb-3">
+        <div className="input-group">
+          <input
+            type="number"
+            className="form-control"
+            placeholder="Enter bulk contribution amount"
+            value={bulkContributionAmount}
+            onChange={(e) => setBulkContributionAmount(e.target.value)}
+          />
+          <button
+            className="btn btn-success"
+            onClick={() => handleBulkContribution(false)}
+          >
+            Add Contribution for Non-Bid Winners
+          </button>
+          <button
+            className="btn btn-warning"
+            onClick={() => handleBulkContribution(true)}
+          >
+            Add Contribution for Bid-Winners
+          </button>
+        </div>
+      </div>
+
       <div className="table-responsive">
         <table className="table table-bordered table-striped">
           <thead className="thead-dark">
@@ -247,7 +295,6 @@ const MemberTable = () => {
               <th>Bid Details</th>
               <th>Status</th>
               <th>Date Joined</th>
-              {/* <th>Maturity Date</th> */}
               <th>Actions</th>
             </tr>
           </thead>
@@ -268,7 +315,6 @@ const MemberTable = () => {
                   </td>
                   <td>{member.status}</td>
                   <td>{new Date(member.dateJoined).toLocaleDateString()}</td>
-                  {/* <td>{new Date(member.maturityDate).toLocaleDateString()}</td> */}
                   <td>
                     <button
                       className="btn btn-info btn-sm mb-1 me-2"
@@ -358,10 +404,6 @@ const MemberTable = () => {
                   <strong>Date Joined:</strong>{" "}
                   {new Date(selectedMember.dateJoined).toLocaleDateString()}
                 </p>
-                {/* <p>
-                  <strong>Maturity Date:</strong>{" "}
-                  {new Date(selectedMember.maturityDate).toLocaleDateString()}
-                </p> */}
               </div>
 
               <div className="popup-chart">

@@ -18,5 +18,7 @@ public interface ContryService {
     ContryDto updateContry(ContryDto ContryDto, Long id);
 
     void deleteContry(Long id);
+
+    void addBulkContributions(Long todoId, List<Long> memberIds, double amount);
 }
 

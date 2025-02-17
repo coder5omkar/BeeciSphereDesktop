@@ -34,3 +34,11 @@ export const getContryById = (id) => axios.get(`${BASE_REST_API_URL}/${id}`);
 
 export const getContryByMemberId = (memberId) => 
   axios.get(`${BASE_REST_API_URL}/member/${memberId}`);
+
+// Bulk update contributions
+export const addBulkContributions = (todoId, memberIds, amount) =>
+  axios.post(`${BASE_REST_API_URL}/bulk-update`, {
+    todoId,
+    memberIds,
+    amount,
+  });
