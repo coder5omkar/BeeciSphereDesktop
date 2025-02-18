@@ -23,3 +23,14 @@ export const deleteMember = (id) => axios.delete(BASE_REST_API_URL + '/' + id);
 
 export const getMemberByBCID = (todoId) => axios.get(`${BASE_REST_API_URL}/todo/${todoId}`);
 
+// New API for bulk upload
+export const bulkUploadMembers = (todoId, file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return axios.post(`${BASE_REST_API_URL}/${todoId}/bulk-upload`, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+    });
+};

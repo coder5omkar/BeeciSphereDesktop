@@ -11,6 +11,7 @@ import com.example.biceedesktop.repository.MemberRepository;
 import com.example.biceedesktop.repository.TodoRepository;
 import com.example.biceedesktop.service.MemberService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,6 +123,34 @@ public class MemberServiceImpl implements MemberService {
                 .map(this::mapToMemberDtoWithContributions)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    @Override
+    public void saveAll(List<MemberDto> memberDtos, Long todoId) {
+        // Fetch the Todo entity
+        Todo todo = todoRepository.findById(todoId)
+                .orElseThrow(() -> new ResourceNotFoundException("Todo not found with id: " + todoId));
+
+        // Convert DTOs to entities
+        List<Member> members = memberDtos.stream().map(memberDto -> {
+            Member member = new Member();
+            member.setName(memberDto.getName());
+            member.setEmail(memberDto.getEmail());
+            member.setPhoneNumber(memberDto.getPhoneNumber());
+            member.setAddress(memberDto.getAddress());
+            member.setAmountReceived(memberDto.getAmountReceived());
+            member.setMaturityAmount(memberDto.getMaturityAmount());
+            member.setStatus(memberDto.getStatus());
+            member.setDateJoined(memberDto.getDateJoined());
+            member.setMaturityDate(memberDto.getMaturityDate());
+            member.setTodo(todo); // Associate with the given Todo
+            return member;
+        }).collect(Collectors.toList());
+
+        // Save all members
+        memberRepository.saveAll(members);
+    }
+
 
     // Helper method to map Member entity to MemberDto
     private MemberDto mapToMemberDto(Member member) {

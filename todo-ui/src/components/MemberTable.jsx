@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getMemberByBCID, deleteMember } from "../services/MemberService";
-import { addBulkContributions } from "../services/ContryService"
+import { getMemberByBCID, deleteMember, bulkUploadMembers } from "../services/MemberService";
+import { addBulkContributions } from "../services/ContryService";
 import { getTodo } from "../services/TodoService";
 import { Pie } from "react-chartjs-2";
 import "chart.js/auto";
@@ -14,12 +14,14 @@ import {
   FaPhone,
   FaFilePdf,
   FaMoneyBillWave,
+  FaUpload,
 } from "react-icons/fa";
 
 const MemberTable = () => {
   const { todoId } = useParams();
   const navigate = useNavigate();
   const [members, setMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
   const [numberOfInstallments, setNumberOfInstallments] = useState(0);
@@ -28,11 +30,20 @@ const MemberTable = () => {
   const [nextInstAmount, setNextInstAmount] = useState(0);
   const [nextInstDate, setNextInstDate] = useState(null);
   const [bulkContributionAmount, setBulkContributionAmount] = useState("");
+  const [bulkUploadFile, setBulkUploadFile] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     fetchTodoDetails();
     fetchMembers();
   }, []);
+
+  useEffect(() => {
+    const filtered = members.filter(member =>
+      member.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredMembers(filtered);
+  }, [searchTerm, members]);
 
   const fetchTodoDetails = async () => {
     try {
@@ -193,21 +204,48 @@ const MemberTable = () => {
       alert("Please enter a valid amount for bulk contribution.");
       return;
     }
-
+  
     const membersToUpdate = members.filter(member => member.isBidWinner === isBidWinner);
-
+  
     if (membersToUpdate.length === 0) {
       alert(`No ${isBidWinner ? "bid-winners" : "non-bid winners"} found.`);
       return;
     }
-
+  
     try {
       await addBulkContributions(todoId, membersToUpdate.map(member => member.id), parseFloat(bulkContributionAmount));
       alert("Bulk contributions added successfully.");
       fetchMembers();
+  
+      // Clear the contribution amount after success
+      setBulkContributionAmount("");
     } catch (error) {
       console.error("Error adding bulk contributions:", error);
       alert("Failed to add bulk contributions.");
+    }
+  };
+  
+  const handleBulkUpload = async () => {
+    if (!bulkUploadFile) {
+      alert("Please select a file to upload.");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("file", bulkUploadFile);
+  
+    try {
+      const response = await bulkUploadMembers(todoId, bulkUploadFile);
+      console.log("Response:", response);
+      alert(response.data); // Show success message
+      fetchMembers();
+      
+      // Clear the uploaded file
+      setBulkUploadFile(null);
+      document.getElementById("fileInput").value = ""; // Reset file input field
+    } catch (error) {
+      console.error("Error uploading members:", error);
+      alert("Failed to upload members.");
     }
   };
 
@@ -263,6 +301,25 @@ const MemberTable = () => {
       <div className="mb-3">
         <div className="input-group">
           <input
+            type="file"
+            id="fileInput"
+            className="form-control"
+            accept=".xlsx, .xls"
+            onChange={(e) => setBulkUploadFile(e.target.files[0])}
+          />
+          <button
+            className="btn btn-secondary"
+            onClick={handleBulkUpload}
+          >
+            <FaUpload className="me-2" />
+            Bulk Upload Members
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-3">
+        <div className="input-group">
+          <input
             type="number"
             className="form-control"
             placeholder="Enter bulk contribution amount"
@@ -284,6 +341,16 @@ const MemberTable = () => {
         </div>
       </div>
 
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Search by member name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <div className="table-responsive">
         <table className="table table-bordered table-striped">
           <thead className="thead-dark">
@@ -299,8 +366,8 @@ const MemberTable = () => {
             </tr>
           </thead>
           <tbody>
-            {members.length > 0 ? (
-              members.map((member) => (
+            {filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
                 <tr key={member.id}>
                   <td>{member.id}</td>
                   <td>{member.name}</td>

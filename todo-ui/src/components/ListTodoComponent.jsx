@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { deleteTodo, getAllTodos } from "../services/TodoService";
 import { useNavigate } from "react-router-dom";
 import { FaUserEdit, FaTrash, FaEye, FaGavel } from "react-icons/fa";
-import "./ListTodoComponent.css"; // Import your custom CSS file
+import "./ListTodoComponent.css";
 
 const ListTodoComponent = () => {
   const [todos, setTodos] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // New state for search
   const [currentPage, setCurrentPage] = useState(1);
   const todosPerPage = 8;
   const navigate = useNavigate();
@@ -95,20 +96,34 @@ const ListTodoComponent = () => {
     return 1; // On-time
   };
 
+  // Filter todos based on search term
+  const filteredTodos = todos.filter((todo) =>
+    todo.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const indexOfLastTodo = currentPage * todosPerPage;
   const indexOfFirstTodo = indexOfLastTodo - todosPerPage;
-  const currentTodos = getPrioritySortedTodos(todos).slice(
+  const currentTodos = getPrioritySortedTodos(filteredTodos).slice(
     indexOfFirstTodo,
     indexOfLastTodo
   );
-  const totalPages = Math.ceil(todos.length / todosPerPage);
+  const totalPages = Math.ceil(filteredTodos.length / todosPerPage);
 
   return (
     <div className="container">
       <h2 className="text-center">MAIN PANEL</h2>
-      <button className="btn btn-primary mb-2" onClick={addNewTodo}>
-        Add New BC
-      </button>
+      <div className="d-flex justify-content-between mb-2">
+        <button className="btn btn-primary" onClick={addNewTodo}>
+          Add New BC
+        </button>
+        <input
+          type="text"
+          className="form-control w-25"
+          placeholder="Search by BC Title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
       <div>
         <table className="table table-bordered table-striped">
           <thead>
@@ -123,7 +138,7 @@ const ListTodoComponent = () => {
               <th>Previous Install for NB</th>
               <th>Next Install for NB</th>
               <th>Bicee Balance</th>
-              <th className="actions-column">Actions</th> {/* Add custom class */}
+              <th className="actions-column">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -163,7 +178,7 @@ const ListTodoComponent = () => {
                   )}
                 </td>
                 <td>{todo.bcBalance !== null ? todo.bcBalance : "N/A"}</td>
-                <td className="actions-column"> {/* Add custom class */}
+                <td className="actions-column">
                   <button
                     className="btn btn-info btn-sm mb-1 me-2"
                     onClick={() => updateTodo(todo.id)}
@@ -198,7 +213,7 @@ const ListTodoComponent = () => {
           </tbody>
         </table>
 
-        {todos.length > 8 && (
+        {filteredTodos.length > 8 && (
           <div className="d-flex justify-content-center mt-3">
             <button
               className="btn btn-secondary"
